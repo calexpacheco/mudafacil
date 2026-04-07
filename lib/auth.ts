@@ -53,7 +53,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     async session({ session, token }) {
       if (session.user) {
         session.user.id = token.id as string
-        session.user.plan = token.plan as string
+        session.user.plan = token.plan as 'FREE' | 'TRIAL' | 'PRO'
         session.user.trialEnd = token.trialEnd as Date | null
         session.user.subscriptionEnd = token.subscriptionEnd as Date | null
       }

@@ -191,7 +191,7 @@ export function CanvasEditor({ mudancaId, caminhaoInicial, layoutInicial, plan, 
           cotacaoId: cotacao.id,
           nomeTransportadora: cotacao.transportadora.nome,
           precoCentavos: cotacao.precoCentavos,
-          caminhaoId: cotacao.caminhao.id,
+          caminhaoTipo: cotacao.caminhao.tipo,   // tipo enum, não o ID mock
           dataDisponivel: cotacao.dataDisponivel,
           seguroIncluso: cotacao.seguroIncluso,
           validade: cotacao.validade,

@@ -12,33 +12,123 @@ import { CAMINHOES } from '@/lib/caminhoes'
 import { PLAN_LIMITS } from '@/lib/plan-limits'
 import type { CaminhaoInfo, ItemPositionado, FiltrosCotacao, CotacaoCard } from '@/types/mudafacil'
 
+const d = (days: number) => new Date(Date.now() + days * 86400000).toISOString()
+
 const COTACOES_MOCK: CotacaoCard[] = [
+  // ── Fiorino ──────────────────────────────────────────────────────────────
   {
-    id: '1',
-    transportadora: { id: 't1', nome: 'MudaBR Express', notaMedia: 4.8, totalAvaliacoes: 312, cidade: 'São Paulo', logoUrl: undefined, tiposCaminhao: ['HR', 'TRES_QUARTOS'] },
+    id: 'c1',
+    transportadora: { id: 't1', nome: 'FreteFácil SP', notaMedia: 4.5, totalAvaliacoes: 143, cidade: 'São Paulo', logoUrl: undefined, tiposCaminhao: ['FIORINO'] },
+    caminhao: CAMINHOES[0],
+    precoCentavos: 32000,
+    dataDisponivel: d(1),
+    seguroIncluso: false,
+    validade: d(6),
+  },
+  {
+    id: 'c2',
+    transportadora: { id: 't2', nome: 'Leve & Rápido', notaMedia: 4.1, totalAvaliacoes: 58, cidade: 'Guarulhos', logoUrl: undefined, tiposCaminhao: ['FIORINO', 'HR'] },
+    caminhao: CAMINHOES[0],
+    precoCentavos: 28500,
+    dataDisponivel: d(3),
+    seguroIncluso: false,
+    validade: d(8),
+  },
+
+  // ── HR / Sprinter ─────────────────────────────────────────────────────────
+  {
+    id: 'c3',
+    transportadora: { id: 't3', nome: 'MudaBR Express', notaMedia: 4.8, totalAvaliacoes: 312, cidade: 'São Paulo', logoUrl: undefined, tiposCaminhao: ['HR', 'TRES_QUARTOS'] },
     caminhao: CAMINHOES[1],
     precoCentavos: 89000,
-    dataDisponivel: new Date(Date.now() + 2 * 86400000).toISOString(),
+    dataDisponivel: d(2),
     seguroIncluso: true,
-    validade: new Date(Date.now() + 7 * 86400000).toISOString(),
+    validade: d(7),
   },
   {
-    id: '2',
-    transportadora: { id: 't2', nome: 'Rápido Mudanças', notaMedia: 4.2, totalAvaliacoes: 87, cidade: 'São Paulo', logoUrl: undefined, tiposCaminhao: ['FIORINO', 'HR'] },
+    id: 'c4',
+    transportadora: { id: 't4', nome: 'Rápido Mudanças', notaMedia: 4.2, totalAvaliacoes: 87, cidade: 'São Paulo', logoUrl: undefined, tiposCaminhao: ['FIORINO', 'HR'] },
     caminhao: CAMINHOES[1],
     precoCentavos: 74000,
-    dataDisponivel: new Date(Date.now() + 5 * 86400000).toISOString(),
+    dataDisponivel: d(5),
     seguroIncluso: false,
-    validade: new Date(Date.now() + 7 * 86400000).toISOString(),
+    validade: d(10),
   },
   {
-    id: '3',
-    transportadora: { id: 't3', nome: 'Mudança Segura', notaMedia: 4.6, totalAvaliacoes: 204, cidade: 'São Paulo', logoUrl: undefined, tiposCaminhao: ['TRES_QUARTOS', 'BAU'] },
+    id: 'c5',
+    transportadora: { id: 't5', nome: 'TransporteJá', notaMedia: 3.9, totalAvaliacoes: 34, cidade: 'Santo André', logoUrl: undefined, tiposCaminhao: ['HR'] },
+    caminhao: CAMINHOES[1],
+    precoCentavos: 65000,
+    dataDisponivel: d(7),
+    seguroIncluso: false,
+    validade: d(12),
+  },
+  {
+    id: 'c6',
+    transportadora: { id: 't6', nome: 'Mudança Premium', notaMedia: 4.9, totalAvaliacoes: 521, cidade: 'São Paulo', logoUrl: undefined, tiposCaminhao: ['HR', 'TRES_QUARTOS', 'BAU'] },
+    caminhao: CAMINHOES[1],
+    precoCentavos: 97500,
+    dataDisponivel: d(1),
+    seguroIncluso: true,
+    validade: d(5),
+  },
+
+  // ── 3/4 Truck ────────────────────────────────────────────────────────────
+  {
+    id: 'c7',
+    transportadora: { id: 't7', nome: 'Mudança Segura', notaMedia: 4.6, totalAvaliacoes: 204, cidade: 'São Paulo', logoUrl: undefined, tiposCaminhao: ['TRES_QUARTOS', 'BAU'] },
     caminhao: CAMINHOES[2],
     precoCentavos: 135000,
-    dataDisponivel: new Date(Date.now() + 1 * 86400000).toISOString(),
+    dataDisponivel: d(1),
     seguroIncluso: true,
-    validade: new Date(Date.now() + 5 * 86400000).toISOString(),
+    validade: d(5),
+  },
+  {
+    id: 'c8',
+    transportadora: { id: 't8', nome: 'Brasil Mudanças', notaMedia: 4.4, totalAvaliacoes: 176, cidade: 'Campinas', logoUrl: undefined, tiposCaminhao: ['TRES_QUARTOS'] },
+    caminhao: CAMINHOES[2],
+    precoCentavos: 118000,
+    dataDisponivel: d(4),
+    seguroIncluso: false,
+    validade: d(9),
+  },
+  {
+    id: 'c9',
+    transportadora: { id: 't9', nome: 'Sul Frete & Mudança', notaMedia: 4.3, totalAvaliacoes: 92, cidade: 'São Bernardo', logoUrl: undefined, tiposCaminhao: ['HR', 'TRES_QUARTOS'] },
+    caminhao: CAMINHOES[2],
+    precoCentavos: 122000,
+    dataDisponivel: d(2),
+    seguroIncluso: true,
+    validade: d(7),
+  },
+
+  // ── Baú ──────────────────────────────────────────────────────────────────
+  {
+    id: 'c10',
+    transportadora: { id: 't10', nome: 'MegaMuda', notaMedia: 4.7, totalAvaliacoes: 389, cidade: 'São Paulo', logoUrl: undefined, tiposCaminhao: ['BAU'] },
+    caminhao: CAMINHOES[3],
+    precoCentavos: 198000,
+    dataDisponivel: d(3),
+    seguroIncluso: true,
+    validade: d(7),
+  },
+  {
+    id: 'c11',
+    transportadora: { id: 't11', nome: 'Carrega Tudo', notaMedia: 4.0, totalAvaliacoes: 67, cidade: 'Osasco', logoUrl: undefined, tiposCaminhao: ['TRES_QUARTOS', 'BAU'] },
+    caminhao: CAMINHOES[3],
+    precoCentavos: 175000,
+    dataDisponivel: d(6),
+    seguroIncluso: false,
+    validade: d(10),
+  },
+  {
+    id: 'c12',
+    transportadora: { id: 't12', nome: 'Logística Total', notaMedia: 4.5, totalAvaliacoes: 248, cidade: 'São Paulo', logoUrl: undefined, tiposCaminhao: ['BAU'] },
+    caminhao: CAMINHOES[3],
+    precoCentavos: 210000,
+    dataDisponivel: d(2),
+    seguroIncluso: true,
+    validade: d(6),
   },
 ]
 

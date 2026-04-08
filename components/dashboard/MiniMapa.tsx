@@ -1,5 +1,7 @@
 'use client'
 
+// CSS do Leaflet DEVE ser import estático — import dinâmico de CSS não funciona no Next.js
+import 'leaflet/dist/leaflet.css'
 import { useEffect, useRef } from 'react'
 
 interface MiniMapaProps {
@@ -10,25 +12,27 @@ interface MiniMapaProps {
 }
 
 export function MiniMapa({ latOrigem, lngOrigem, latDestino, lngDestino }: MiniMapaProps) {
-  const mapRef = useRef<HTMLDivElement>(null)
-  const instanceRef = useRef<unknown>(null)
+  const containerRef = useRef<HTMLDivElement>(null)
+  // Guarda a instância do mapa para destruir corretamente no cleanup
+  const mapRef = useRef<{ remove: () => void } | null>(null)
 
   useEffect(() => {
-    if (!mapRef.current || instanceRef.current) return
+    if (!containerRef.current) return
+    // Evita dupla inicialização no React StrictMode
+    if (mapRef.current) return
 
-    // Importa Leaflet dinamicamente (só no cliente)
-    import('leaflet').then((L) => {
-      import('leaflet/dist/leaflet.css')
+    let cancelled = false
 
-      if (!mapRef.current || instanceRef.current) return
+    import('leaflet').then((Lmod) => {
+      const L = Lmod.default ?? Lmod
+      if (cancelled || !containerRef.current) return
 
-      // Calcula centro e zoom para abranger ambos os pontos
       const bounds = L.latLngBounds(
         [latOrigem, lngOrigem],
         [latDestino, lngDestino]
       )
 
-      const map = L.map(mapRef.current, {
+      const map = L.map(containerRef.current, {
         zoomControl: false,
         attributionControl: false,
         dragging: false,
@@ -38,69 +42,54 @@ export function MiniMapa({ latOrigem, lngOrigem, latDestino, lngDestino }: MiniM
         keyboard: false,
       })
 
-      instanceRef.current = map
+      mapRef.current = map
 
       L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
-        maxZoom: 18,
+        maxZoom: 19,
       }).addTo(map)
 
-      map.fitBounds(bounds, { padding: [20, 20] })
+      map.fitBounds(bounds, { padding: [24, 24] })
 
-      // Marcador A — Origem (azul)
-      const iconOrigem = L.divIcon({
+      // Ícone Marcador A — Origem (azul)
+      const mkA = L.divIcon({
         className: '',
-        html: `<div style="
-          width:28px;height:28px;border-radius:50% 50% 50% 0;
-          background:#2563EB;border:2px solid white;
-          transform:rotate(-45deg);
-          box-shadow:0 2px 6px rgba(0,0,0,0.3);
-          display:flex;align-items:center;justify-content:center;
-        ">
-          <span style="transform:rotate(45deg);color:white;font-size:11px;font-weight:700;">A</span>
-        </div>`,
-        iconSize: [28, 28],
-        iconAnchor: [14, 28],
+        html: `<div style="width:26px;height:26px;border-radius:50% 50% 50% 0;background:#2563EB;border:2px solid white;transform:rotate(-45deg);box-shadow:0 2px 6px rgba(0,0,0,0.35);display:flex;align-items:center;justify-content:center;"><span style="transform:rotate(45deg);color:white;font-size:10px;font-weight:700;line-height:1;">A</span></div>`,
+        iconSize: [26, 26],
+        iconAnchor: [13, 26],
       })
 
-      // Marcador B — Destino (laranja)
-      const iconDestino = L.divIcon({
+      // Ícone Marcador B — Destino (laranja)
+      const mkB = L.divIcon({
         className: '',
-        html: `<div style="
-          width:28px;height:28px;border-radius:50% 50% 50% 0;
-          background:#ea580c;border:2px solid white;
-          transform:rotate(-45deg);
-          box-shadow:0 2px 6px rgba(0,0,0,0.3);
-          display:flex;align-items:center;justify-content:center;
-        ">
-          <span style="transform:rotate(45deg);color:white;font-size:11px;font-weight:700;">B</span>
-        </div>`,
-        iconSize: [28, 28],
-        iconAnchor: [14, 28],
+        html: `<div style="width:26px;height:26px;border-radius:50% 50% 50% 0;background:#ea580c;border:2px solid white;transform:rotate(-45deg);box-shadow:0 2px 6px rgba(0,0,0,0.35);display:flex;align-items:center;justify-content:center;"><span style="transform:rotate(45deg);color:white;font-size:10px;font-weight:700;line-height:1;">B</span></div>`,
+        iconSize: [26, 26],
+        iconAnchor: [13, 26],
       })
 
-      L.marker([latOrigem, lngOrigem], { icon: iconOrigem }).addTo(map)
-      L.marker([latDestino, lngDestino], { icon: iconDestino }).addTo(map)
+      L.marker([latOrigem, lngOrigem], { icon: mkA }).addTo(map)
+      L.marker([latDestino, lngDestino], { icon: mkB }).addTo(map)
 
-      // Linha tracejada entre A e B
       L.polyline(
         [[latOrigem, lngOrigem], [latDestino, lngDestino]],
-        { color: '#2563EB', weight: 2, dashArray: '6 4', opacity: 0.8 }
+        { color: '#2563EB', weight: 2.5, dashArray: '6 5', opacity: 0.75 }
       ).addTo(map)
     })
 
     return () => {
-      if (instanceRef.current) {
-        ;(instanceRef.current as { remove: () => void }).remove()
-        instanceRef.current = null
+      cancelled = true
+      if (mapRef.current) {
+        mapRef.current.remove()
+        mapRef.current = null
       }
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [latOrigem, lngOrigem, latDestino, lngDestino])
 
   return (
     <div
-      ref={mapRef}
-      className="w-full rounded-lg overflow-hidden bg-gray-100"
-      style={{ height: 120 }}
+      ref={containerRef}
+      style={{ height: 128, width: '100%' }}
+      className="rounded-t-xl overflow-hidden bg-gray-100"
     />
   )
 }
@@ -108,14 +97,24 @@ export function MiniMapa({ latOrigem, lngOrigem, latDestino, lngDestino }: MiniM
 // Placeholder quando não há coordenadas
 export function MiniMapaPlaceholder() {
   return (
-    <div className="w-full rounded-lg overflow-hidden bg-gradient-to-br from-blue-50 to-gray-100 flex items-center justify-center gap-3" style={{ height: 120 }}>
-      <div className="flex items-center gap-2 text-gray-400">
-        <div className="flex flex-col items-center gap-1">
-          <div className="w-5 h-5 rounded-full bg-blue-400 flex items-center justify-center text-white text-xs font-bold">A</div>
-          <div className="w-px h-8 bg-gray-300 border-dashed border-l-2 border-gray-300" />
-          <div className="w-5 h-5 rounded-full bg-orange-400 flex items-center justify-center text-white text-xs font-bold">B</div>
+    <div
+      className="w-full rounded-t-xl overflow-hidden bg-gradient-to-br from-blue-50 to-slate-100 flex items-center justify-center gap-4"
+      style={{ height: 128 }}
+    >
+      <div className="flex items-center gap-3 text-gray-400">
+        <div className="flex flex-col items-center gap-0.5">
+          <div className="w-6 h-6 rounded-full bg-blue-400 flex items-center justify-center text-white text-xs font-bold shadow-sm">A</div>
+          <div className="flex flex-col gap-0.5">
+            {[...Array(4)].map((_, i) => (
+              <div key={i} className="w-px h-1.5 bg-gray-300 mx-auto" />
+            ))}
+          </div>
+          <div className="w-6 h-6 rounded-full bg-orange-400 flex items-center justify-center text-white text-xs font-bold shadow-sm">B</div>
         </div>
-        <p className="text-xs text-gray-400">Mapa indisponível</p>
+        <div>
+          <p className="text-xs font-medium text-gray-500">Mapa não disponível</p>
+          <p className="text-[11px] text-gray-400 mt-0.5">Crie uma nova mudança<br/>para ver a rota</p>
+        </div>
       </div>
     </div>
   )

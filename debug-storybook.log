@@ -1,0 +1,27 @@
+[17:16:50.698] [INFO] storybook v10.3.4
+[17:16:50.941] [DEBUG] Getting package.json info for /Users/carlospacheco/Documents/Projects/workshop Muda Facil/mudafacil/package.json...
+[17:16:51.937] [INFO] Starting...
+[17:16:52.043] [DEBUG] Starting preview..
+[17:16:52.063] [INFO] Using implicit CSS loaders
+[17:16:52.176] [ERROR] Failed to build the preview
+[17:16:52.177] [ERROR] [38;2;241;97;97mError: Cannot find module 'ajv/dist/compile/codegen'
+Require stack:
+- ./node_modules/ajv-keywords/dist/definitions/typeof.js
+- ./node_modules/ajv-keywords/dist/keywords/typeof.js
+- ./node_modules/ajv-keywords/dist/keywords/index.js
+- ./node_modules/ajv-keywords/dist/index.js
+- ./node_modules/schema-utils/dist/validate.js
+- ./node_modules/schema-utils/dist/index.js
+- ./node_modules/webpack-dev-middleware/dist/index.js[39m
+    at Module._resolveFilename (node:internal/modules/cjs/loader:1207:15)
+    at Module._load (node:internal/modules/cjs/loader:1038:27)
+    at Module.require (node:internal/modules/cjs/loader:1289:19)
+    at require (node:internal/modules/helpers:182:18)
+    at Object.<anonymous> (./node_modules/ajv-keywords/dist/definitions/typeof.js:3:19)
+    at Module._compile (node:internal/modules/cjs/loader:1521:14)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1623:10)
+    at Module.load (node:internal/modules/cjs/loader:1266:32)
+    at Module._load (node:internal/modules/cjs/loader:1091:12)
+    at Module.require (node:internal/modules/cjs/loader:1289:19)
+[17:16:52.180] [WARN] Broken build, fix the error above.
+You may need to refresh the browser.

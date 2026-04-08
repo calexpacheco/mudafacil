@@ -4,6 +4,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 import { PLAN_LIMITS } from '@/lib/plan-limits'
 import { hasAccess } from '@/lib/subscription'
+import { geocodeAddress } from '@/lib/geocoding'
 
 const createMudancaSchema = z.object({
   enderecoOrigem: z.string().min(5, 'Endereço de origem obrigatório'),
@@ -45,12 +46,22 @@ export async function POST(req: NextRequest) {
     }
   }
 
+  // Geocodifica endereços em paralelo (best-effort — não bloqueia criação)
+  const [geoOrigem, geoDestino] = await Promise.all([
+    geocodeAddress(parsed.data.enderecoOrigem),
+    geocodeAddress(parsed.data.enderecoDestino),
+  ])
+
   const mudanca = await db.mudanca.create({
     data: {
       userId: session.user.id,
       enderecoOrigem: parsed.data.enderecoOrigem,
       enderecoDestino: parsed.data.enderecoDestino,
       dataDesejada: parsed.data.dataDesejada ? new Date(parsed.data.dataDesejada) : null,
+      latOrigem: geoOrigem?.lat ?? null,
+      lngOrigem: geoOrigem?.lng ?? null,
+      latDestino: geoDestino?.lat ?? null,
+      lngDestino: geoDestino?.lng ?? null,
     },
   })
 

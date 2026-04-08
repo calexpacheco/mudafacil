@@ -153,6 +153,14 @@ model Mudanca {
   caminhao        Caminhao?     @relation(fields: [caminhaoId], references: [id])
   status          MudancaStatus @default(RASCUNHO)
 
+  // Campos enriquecidos do cartão
+  valorEstimadoCentavos Int?
+  progressoPercentual   Float   @default(0)
+  latOrigem             Float?
+  lngOrigem             Float?
+  latDestino            Float?
+  lngDestino            Float?
+
   itens       MudancaItem[]
   cargaLayout CargaLayout?
   cotacoes    Cotacao[]
@@ -166,6 +174,7 @@ enum MudancaStatus {
   AGUARDANDO_COTACAO
   COTADO
   CONFIRMADO
+  EM_ANDAMENTO
   CONCLUIDO
   CANCELADO
 }

@@ -4,6 +4,12 @@ import { db } from '@/lib/db'
 import Link from 'next/link'
 import { TrialBanner } from '@/components/paywall/PaywallGate'
 import { Navbar } from '@/components/layout/Navbar'
+import { MudancaCard } from '@/components/dashboard/MudancaCard'
+import type { Prisma } from '../generated/prisma/client'
+
+type MudancaComRelacoes = Prisma.MudancaGetPayload<{
+  include: { caminhao: true; itens: true }
+}>
 
 export default async function DashboardPage() {
   const session = await auth()
@@ -50,8 +56,8 @@ export default async function DashboardPage() {
         {user.mudancas.length === 0 ? (
           <EmptyState />
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {user.mudancas.map((mudanca: { id: string; enderecoOrigem: string; enderecoDestino: string; status: string; itens: unknown[]; caminhao: { nome: string } | null }) => (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+            {user.mudancas.map((mudanca: MudancaComRelacoes) => (
               <MudancaCard
                 key={mudanca.id}
                 id={mudanca.id}
@@ -60,6 +66,14 @@ export default async function DashboardPage() {
                 status={mudanca.status}
                 totalItens={mudanca.itens.length}
                 caminhaoNome={mudanca.caminhao?.nome ?? null}
+                caminhaoTipo={mudanca.caminhao?.tipo ?? null}
+                dataDesejada={mudanca.dataDesejada}
+                valorEstimadoCentavos={mudanca.valorEstimadoCentavos}
+                progressoPercentual={mudanca.progressoPercentual}
+                latOrigem={mudanca.latOrigem}
+                lngOrigem={mudanca.lngOrigem}
+                latDestino={mudanca.latDestino}
+                lngDestino={mudanca.lngDestino}
               />
             ))}
           </div>
@@ -84,67 +98,5 @@ function EmptyState() {
         Planejar minha mudança
       </Link>
     </div>
-  )
-}
-
-const STATUS_LABELS: Record<string, string> = {
-  RASCUNHO: 'Rascunho',
-  AGUARDANDO_COTACAO: 'Aguardando cotação',
-  COTADO: 'Cotado',
-  CONFIRMADO: 'Confirmado',
-  CONCLUIDO: 'Concluído',
-  CANCELADO: 'Cancelado',
-}
-
-const STATUS_COLORS: Record<string, string> = {
-  RASCUNHO: 'bg-gray-100 text-gray-600',
-  AGUARDANDO_COTACAO: 'bg-amber-100 text-amber-700',
-  COTADO: 'bg-blue-100 text-blue-700',
-  CONFIRMADO: 'bg-green-100 text-green-700',
-  CONCLUIDO: 'bg-green-100 text-green-700',
-  CANCELADO: 'bg-red-100 text-red-700',
-}
-
-function MudancaCard({
-  id,
-  enderecoOrigem,
-  enderecoDestino,
-  status,
-  totalItens,
-  caminhaoNome,
-}: {
-  id: string
-  enderecoOrigem: string
-  enderecoDestino: string
-  status: string
-  totalItens: number
-  caminhaoNome: string | null
-}) {
-  return (
-    <Link
-      href={`/app/mudanca/${id}`}
-      className="flex flex-col gap-3 p-5 rounded-xl border border-gray-200 bg-white hover:shadow-md transition-shadow"
-    >
-      <div className="flex items-start justify-between gap-2">
-        <div className="flex-1 min-w-0">
-          <p className="text-xs text-gray-400 font-medium">ORIGEM</p>
-          <p className="text-sm font-semibold text-gray-900 truncate">{enderecoOrigem}</p>
-        </div>
-        <span className="text-gray-400 text-lg flex-shrink-0">→</span>
-        <div className="flex-1 min-w-0 text-right">
-          <p className="text-xs text-gray-400 font-medium">DESTINO</p>
-          <p className="text-sm font-semibold text-gray-900 truncate">{enderecoDestino}</p>
-        </div>
-      </div>
-
-      <div className="flex items-center justify-between">
-        <span className={`text-xs px-2.5 py-1 rounded-full font-medium ${STATUS_COLORS[status] ?? 'bg-gray-100'}`}>
-          {STATUS_LABELS[status] ?? status}
-        </span>
-        <div className="text-xs text-gray-400">
-          {totalItens} itens{caminhaoNome ? ` · ${caminhaoNome}` : ''}
-        </div>
-      </div>
-    </Link>
   )
 }

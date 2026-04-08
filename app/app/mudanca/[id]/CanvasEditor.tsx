@@ -44,6 +44,7 @@ const COTACOES_MOCK: CotacaoCard[] = [
 
 type PlanType = 'FREE' | 'TRIAL' | 'PRO'
 type TabType = 'canvas' | 'cotacoes'
+type ContratarStatus = 'idle' | 'loading' | 'success' | 'error'
 
 interface CanvasEditorProps {
   mudancaId: string
@@ -63,6 +64,8 @@ export function CanvasEditor({ mudancaId, caminhaoInicial, layoutInicial, plan, 
   const [filtros, setFiltros] = useState<FiltrosCotacao>({ ordenarPor: 'preco' })
   const [saveStatus, setSaveStatus] = useState<'saved' | 'saving' | 'unsaved'>('saved')
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const [contratarStatus, setContratarStatus] = useState<Record<string, ContratarStatus>>({})
+  const [cotacaoContratadaId, setCotacaoContratadaId] = useState<string | null>(null)
 
   // Carrega layout salvo do banco
   const [itens, setItens] = useState<ItemPositionado[]>(() => {
@@ -178,6 +181,34 @@ export function CanvasEditor({ mudancaId, caminhaoInicial, layoutInicial, plan, 
     saveLayout(itens, novo)
   }
 
+  const handleContratar = useCallback(async (cotacao: CotacaoCard) => {
+    setContratarStatus((prev) => ({ ...prev, [cotacao.id]: 'loading' }))
+    try {
+      const res = await fetch(`/api/mudancas/${mudancaId}/contratar`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          cotacaoId: cotacao.id,
+          nomeTransportadora: cotacao.transportadora.nome,
+          precoCentavos: cotacao.precoCentavos,
+          caminhaoId: cotacao.caminhao.id,
+          dataDisponivel: cotacao.dataDisponivel,
+          seguroIncluso: cotacao.seguroIncluso,
+          validade: cotacao.validade,
+        }),
+      })
+      if (!res.ok) throw new Error('Erro ao contratar')
+      setCotacaoContratadaId(cotacao.id)
+      setContratarStatus((prev) => ({ ...prev, [cotacao.id]: 'success' }))
+      // Atualiza o caminhão no canvas para o da cotação contratada
+      const caminhaoContratado = CAMINHOES.find((c) => c.id === cotacao.caminhao.id)
+      if (caminhaoContratado) handleCaminhaoChange(caminhaoContratado)
+    } catch {
+      setContratarStatus((prev) => ({ ...prev, [cotacao.id]: 'error' }))
+      setTimeout(() => setContratarStatus((prev) => ({ ...prev, [cotacao.id]: 'idle' })), 3000)
+    }
+  }, [mudancaId, handleCaminhaoChange])
+
   return (
     <div className="flex flex-col gap-4">
       {/* Tabs + status de save */}
@@ -250,7 +281,9 @@ export function CanvasEditor({ mudancaId, caminhaoInicial, layoutInicial, plan, 
                   <CardCotacao
                     key={cotacao.id}
                     cotacao={cotacao}
-                    onContratar={(c) => alert(`Contratando ${c.transportadora.nome}...`)}
+                    contratada={cotacaoContratadaId === cotacao.id}
+                    contratarStatus={contratarStatus[cotacao.id] ?? 'idle'}
+                    onContratar={handleContratar}
                   />
                 ))}
               </div>

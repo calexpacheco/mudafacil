@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import dynamic from 'next/dynamic'
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { MiniMapaPlaceholder } from './MiniMapa'
 
 // Leaflet só roda no cliente — carregado dinamicamente
@@ -143,6 +143,111 @@ function MapArea({
   )
 }
 
+// ─── Edição inline do valor estimado ─────────────────────────────────────────
+
+function PrecoInline({ mudancaId, valorCentavos, melhorCotacaoCentavos, nomeTransportadora }: {
+  mudancaId: string
+  valorCentavos: number | null
+  melhorCotacaoCentavos: number | null
+  nomeTransportadora: string | null
+}) {
+  const [valor, setValor] = useState<number | null>(valorCentavos)
+  const [editando, setEditando] = useState(false)
+  const [input, setInput] = useState('')
+  const [saving, setSaving] = useState(false)
+  const inputRef = useRef<HTMLInputElement>(null)
+
+  const fmt = (centavos: number) =>
+    new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(centavos / 100)
+
+  function abrirEdicao(e: React.MouseEvent) {
+    e.preventDefault()
+    setInput(valor != null ? (valor / 100).toFixed(2).replace('.', ',') : '')
+    setEditando(true)
+    setTimeout(() => inputRef.current?.focus(), 0)
+  }
+
+  async function salvar(e: React.FormEvent) {
+    e.preventDefault()
+    const numero = parseFloat(input.replace(',', '.'))
+    if (isNaN(numero) || numero < 0) { setEditando(false); return }
+    const centavos = Math.round(numero * 100)
+    setSaving(true)
+    await fetch(`/api/mudancas/${mudancaId}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ valorEstimadoCentavos: centavos }),
+    })
+    setValor(centavos)
+    setEditando(false)
+    setSaving(false)
+  }
+
+  function cancelar(e: React.MouseEvent | React.KeyboardEvent) {
+    e.preventDefault()
+    setEditando(false)
+  }
+
+  if (editando) {
+    return (
+      <form onSubmit={salvar} onClick={(e) => e.preventDefault()} className="flex items-center gap-1 col-span-2">
+        <span className="text-sm flex-shrink-0">💰</span>
+        <span className="text-xs text-gray-400 flex-shrink-0">R$</span>
+        <input
+          ref={inputRef}
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+          onKeyDown={(e) => e.key === 'Escape' && cancelar(e)}
+          placeholder="0,00"
+          className="w-24 text-xs border border-blue-400 rounded px-1.5 py-0.5 outline-none ring-1 ring-blue-200"
+        />
+        <button type="submit" disabled={saving}
+          className="text-[10px] font-semibold text-white bg-blue-600 rounded px-1.5 py-0.5 hover:bg-blue-700 disabled:opacity-50">
+          {saving ? '…' : 'OK'}
+        </button>
+        <button type="button" onClick={cancelar}
+          className="text-[10px] text-gray-400 hover:text-gray-600">✕</button>
+      </form>
+    )
+  }
+
+  // Mostra valor estimado (prioridade) ou melhor cotação (fallback) ou botão de adicionar
+  if (valor != null) {
+    return (
+      <div className="flex items-center gap-1.5 min-w-0 group">
+        <span className="text-sm flex-shrink-0">💰</span>
+        <span className="text-xs font-semibold text-gray-800 truncate">{fmt(valor)}</span>
+        <button onClick={abrirEdicao}
+          className="opacity-0 group-hover:opacity-100 text-[10px] text-gray-400 hover:text-blue-600 transition-opacity flex-shrink-0">
+          ✏️
+        </button>
+      </div>
+    )
+  }
+
+  if (melhorCotacaoCentavos != null) {
+    return (
+      <div className="flex items-center gap-1.5 min-w-0 col-span-2">
+        <span className="text-sm flex-shrink-0">💰</span>
+        <div className="flex flex-col min-w-0">
+          <span className="text-sm font-bold text-green-700">{fmt(melhorCotacaoCentavos)}</span>
+          <span className="text-[10px] text-gray-500 truncate">
+            ✅ {nomeTransportadora ?? 'Cotação contratada'}
+          </span>
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <button onClick={abrirEdicao}
+      className="flex items-center gap-1.5 text-xs text-gray-400 hover:text-blue-600 transition-colors">
+      <span className="text-sm">💰</span>
+      <span className="underline underline-offset-2">Adicionar valor</span>
+    </button>
+  )
+}
+
 // ─── Props ────────────────────────────────────────────────────────────────────
 
 export interface MudancaCardProps {
@@ -155,6 +260,8 @@ export interface MudancaCardProps {
   caminhaoTipo: string | null
   dataDesejada: Date | string | null
   valorEstimadoCentavos: number | null
+  melhorCotacaoCentavos: number | null
+  nomeTransportadoraContratada: string | null
   progressoPercentual: number
   latOrigem: number | null
   lngOrigem: number | null
@@ -174,6 +281,8 @@ export function MudancaCard({
   caminhaoTipo,
   dataDesejada,
   valorEstimadoCentavos,
+  melhorCotacaoCentavos,
+  nomeTransportadoraContratada,
   progressoPercentual,
   latOrigem,
   lngOrigem,
@@ -185,10 +294,6 @@ export function MudancaCard({
 
   const dataFormatada = dataDesejada
     ? new Date(dataDesejada).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', year: 'numeric' })
-    : null
-
-  const valorFormatado = valorEstimadoCentavos != null
-    ? new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(valorEstimadoCentavos / 100)
     : null
 
   return (
@@ -217,14 +322,13 @@ export function MudancaCard({
         className="flex flex-col gap-3 p-4"
       >
         {/* Rota A → B */}
-        <div className="flex items-start gap-2">
-          <div className="flex flex-col items-center gap-0.5 flex-shrink-0 mt-0.5">
-            <div className="w-4 h-4 rounded-full bg-blue-600 flex items-center justify-center text-white text-[9px] font-bold">A</div>
-            <div className="w-px h-4 bg-gray-200" />
-            <div className="w-4 h-4 rounded-full bg-orange-500 flex items-center justify-center text-white text-[9px] font-bold">B</div>
-          </div>
-          <div className="flex-1 min-w-0 flex flex-col gap-1.5">
+        <div className="flex flex-col gap-1.5">
+          <div className="flex items-center gap-2 min-w-0">
+            <div className="w-4 h-4 rounded-full bg-blue-600 flex items-center justify-center text-white text-[9px] font-bold flex-shrink-0">A</div>
             <p className="text-sm font-medium text-gray-900 truncate leading-tight">{enderecoOrigem}</p>
+          </div>
+          <div className="flex items-center gap-2 min-w-0">
+            <div className="w-4 h-4 rounded-full bg-orange-500 flex items-center justify-center text-white text-[9px] font-bold flex-shrink-0">B</div>
             <p className="text-sm font-medium text-gray-900 truncate leading-tight">{enderecoDestino}</p>
           </div>
         </div>
@@ -240,12 +344,13 @@ export function MudancaCard({
             </div>
           )}
 
-          {valorFormatado && (
-            <div className="flex items-center gap-1.5 min-w-0">
-              <span className="text-sm flex-shrink-0">💰</span>
-              <span className="text-xs font-semibold text-gray-800 truncate">{valorFormatado}</span>
-            </div>
-          )}
+          {/* Preço — sempre visível, com edição inline */}
+          <PrecoInline
+            mudancaId={id}
+            valorCentavos={valorEstimadoCentavos}
+            melhorCotacaoCentavos={melhorCotacaoCentavos}
+            nomeTransportadora={nomeTransportadoraContratada}
+          />
 
           {(caminhaoNome || icone) && (
             <div className="flex items-center gap-1.5 min-w-0">

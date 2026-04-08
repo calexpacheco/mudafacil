@@ -216,6 +216,10 @@ model Cotacao {
   dataDisponivel   DateTime
   seguroIncluso    Boolean        @default(false)
   validade         DateTime
+  contratada       Boolean        @default(false)
+
+  // Dados desnormalizados do mock (nome da transportadora, etc.)
+  nomeTransportadora String?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

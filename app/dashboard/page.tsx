@@ -8,7 +8,7 @@ import { MudancaCard } from '@/components/dashboard/MudancaCard'
 import type { Prisma } from '../generated/prisma/client'
 
 type MudancaComRelacoes = Prisma.MudancaGetPayload<{
-  include: { caminhao: true; itens: true }
+  include: { caminhao: true; itens: true; cotacoes: { where: { contratada: true } } }
 }>
 
 export default async function DashboardPage() {
@@ -21,7 +21,7 @@ export default async function DashboardPage() {
       mudancas: {
         orderBy: { createdAt: 'desc' },
         take: 10,
-        include: { caminhao: true, itens: true },
+        include: { caminhao: true, itens: true, cotacoes: { where: { contratada: true } } },
       },
     },
   })
@@ -69,6 +69,8 @@ export default async function DashboardPage() {
                 caminhaoTipo={mudanca.caminhao?.tipo ?? null}
                 dataDesejada={mudanca.dataDesejada}
                 valorEstimadoCentavos={mudanca.valorEstimadoCentavos}
+                melhorCotacaoCentavos={mudanca.cotacoes[0]?.precoCentavos ?? null}
+                nomeTransportadoraContratada={mudanca.cotacoes[0]?.nomeTransportadora ?? null}
                 progressoPercentual={mudanca.progressoPercentual}
                 latOrigem={mudanca.latOrigem}
                 lngOrigem={mudanca.lngOrigem}

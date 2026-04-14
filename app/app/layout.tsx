@@ -2,6 +2,8 @@ import { auth } from '@/lib/auth'
 import { redirect } from 'next/navigation'
 import { db } from '@/lib/db'
 import { AppShell } from '@/components/layout/AppShell'
+import { NextIntlClientProvider } from 'next-intl'
+import { getMessages } from 'next-intl/server'
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const session = await auth()
@@ -14,10 +16,13 @@ export default async function AppLayout({ children }: { children: React.ReactNod
 
   const userName = user?.name ?? ''
   const userEmail = user?.email ?? ''
+  const messages = await getMessages()
 
   return (
-    <AppShell userName={userName} userEmail={userEmail}>
-      {children}
-    </AppShell>
+    <NextIntlClientProvider messages={messages}>
+      <AppShell userName={userName} userEmail={userEmail}>
+        {children}
+      </AppShell>
+    </NextIntlClientProvider>
   )
 }

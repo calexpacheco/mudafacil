@@ -4,6 +4,7 @@ import { db } from '@/lib/db'
 import { TrialBanner } from '@/components/paywall/PaywallGate'
 import { MudancaCard } from '@/components/dashboard/MudancaCard'
 import { EmptyStateMudancas } from '@/components/dashboard/EmptyStateMudancas'
+import { getTranslations } from 'next-intl/server'
 import type { Prisma } from '../../generated/prisma/client'
 
 type MudancaComRelacoes = Prisma.MudancaGetPayload<{
@@ -13,6 +14,7 @@ type MudancaComRelacoes = Prisma.MudancaGetPayload<{
 export default async function DashboardPage() {
   const session = await auth()
   if (!session?.user?.id) redirect('/login')
+  const t = await getTranslations('app.dashboard')
 
   const user = await db.user.findUnique({
     where: { id: session.user.id },
@@ -39,8 +41,8 @@ export default async function DashboardPage() {
 
       <div className="flex items-center justify-between mb-6 mt-2">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Minhas Mudanças</h1>
-          <p className="text-gray-500 text-sm mt-1">Gerencie e planeje suas mudanças</p>
+          <h1 className="text-2xl font-bold text-gray-900">{t('title')}</h1>
+          <p className="text-gray-500 text-sm mt-1">{t('subtitle')}</p>
         </div>
       </div>
 

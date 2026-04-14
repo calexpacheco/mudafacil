@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { usePathname } from 'next/navigation'
+import { useTranslations } from 'next-intl'
 import { AppSidebar } from './AppSidebar'
 import { AppTopbar } from './AppTopbar'
 import { NovaMudancaModal } from '@/components/ui/NovaMudancaModal'
@@ -17,6 +18,7 @@ export function AppShell({ userName, userEmail, children }: AppShellProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [modalOpen, setModalOpen]     = useState(false)
   const pathname = usePathname()
+  const t = useTranslations('app')
   // Na tela de edição de mudança o FAB próprio substitui este
   const hideFab = pathname.startsWith('/app/mudanca/')
 
@@ -56,10 +58,10 @@ export function AppShell({ userName, userEmail, children }: AppShellProps) {
           onClick={() => setModalOpen(true)}
           className="lg:hidden fixed bottom-6 right-5 flex items-center gap-2 px-5 py-4 rounded-full bg-[#E83500] text-white font-bold text-sm shadow-xl hover:bg-[#C42A08] active:scale-95 transition-all cursor-pointer"
           style={{ zIndex: 1000 }}
-          aria-label="Nova Mudança"
+          aria-label={t('newMove')}
         >
           <IconPlus size={20} stroke={2.5} />
-          Nova Mudança
+          {t('newMove')}
         </button>
       )}
 

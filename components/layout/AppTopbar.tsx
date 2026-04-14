@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react'
 import Link from 'next/link'
+import { useTranslations } from 'next-intl'
 import { cn } from '@/design-system/utils'
 import { signOutAction } from '@/app/app/actions'
 import { IconBell, IconPlus, IconCreditCard, IconLogout, IconMenu2 } from '@tabler/icons-react'
@@ -17,6 +18,7 @@ export function AppTopbar({ userName, userEmail, onToggleSidebar, onOpenModal }:
   const [dropdownOpen, setDropdownOpen] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
   const initial = (userName || 'U').charAt(0).toUpperCase()
+  const t = useTranslations('app')
 
   useEffect(() => {
     function handleClick(e: MouseEvent) {
@@ -47,7 +49,7 @@ export function AppTopbar({ userName, userEmail, onToggleSidebar, onOpenModal }:
       {/* ─── Right actions ───────────────────────────────────────────────── */}
       <div className="flex items-center gap-3">
         <button
-          title="Notificações"
+          title={t('notifications')}
           className="relative p-2 rounded-xl text-gray-500 hover:bg-gray-100 hover:text-gray-700 transition-colors cursor-pointer"
         >
           <IconBell size={20} stroke={1.5} />
@@ -59,7 +61,7 @@ export function AppTopbar({ userName, userEmail, onToggleSidebar, onOpenModal }:
           className="hidden lg:flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#E83500] text-white text-sm font-semibold hover:bg-[#C42A08] transition-colors cursor-pointer"
         >
           <IconPlus size={16} stroke={2} />
-          Nova Mudança
+          {t('newMove')}
         </button>
 
         {/* User avatar + dropdown */}
@@ -88,7 +90,7 @@ export function AppTopbar({ userName, userEmail, onToggleSidebar, onOpenModal }:
                   className="flex items-center gap-2.5 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
                 >
                   <IconCreditCard size={16} stroke={1.5} className="text-gray-700" />
-                  Planos e Pagamentos
+                  {t('nav.billing')}
                 </Link>
               </div>
 
@@ -99,7 +101,7 @@ export function AppTopbar({ userName, userEmail, onToggleSidebar, onOpenModal }:
                     className="flex items-center gap-2.5 w-full px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors cursor-pointer"
                   >
                     <IconLogout size={16} stroke={1.5} className="text-red-600" />
-                    Sair da conta
+                    {t('signOut')}
                   </button>
                 </form>
               </div>

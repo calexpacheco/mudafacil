@@ -134,5 +134,87 @@
     "terms": "Termos de uso",
     "privacy": "Privacidade",
     "support": "Suporte"
+  },
+  "app": {
+    "newMove": "Nova Mudança",
+    "notifications": "Notificações",
+    "signOut": "Sair da conta",
+    "nav": {
+      "tagline": "Organize sua mudança",
+      "myMoves": "Minhas Mudanças",
+      "catalog": "Catálogo de Itens",
+      "billing": "Planos e Pagamentos"
+    },
+    "dashboard": {
+      "title": "Minhas Mudanças",
+      "subtitle": "Gerencie e planeje suas mudanças"
+    },
+    "empty": {
+      "title": "Nenhuma mudança ainda",
+      "description": "Crie sua primeira mudança e planeje visualmente com drag & drop.",
+      "cta": "Planejar minha mudança"
+    },
+    "modal": {
+      "title": "Nova mudança",
+      "subtitle": "Informe os dados e receba estimativas instantâneas",
+      "originLabel": "De onde você está saindo?",
+      "originPlaceholder": "Ex: Rua Augusta, 500 – São Paulo, SP",
+      "destinationLabel": "Para onde você vai?",
+      "destinationPlaceholder": "Ex: Av. Paulista, 1578 – São Paulo, SP",
+      "roomsLabel": "Quais cômodos tem na sua casa?",
+      "dateLabel": "Quando você quer mudar?",
+      "dateHint": "Escolha uma data aproximada — você pode alterar depois",
+      "estimateTitle": "Estimativa instantânea",
+      "estimateItems": "Itens aprox.",
+      "estimateVolume": "Volume aprox.",
+      "estimateVehicle": "Veículo sugerido",
+      "estimatePrice": "Faixa de preço",
+      "estimateHint": "Cotações reais disponíveis após criar a mudança",
+      "cancel": "Cancelar",
+      "submit": "Criar mudança",
+      "submitting": "Criando...",
+      "errorConnection": "Erro de conexão. Tente novamente.",
+      "rooms": [
+        { "label": "Quarto",          "hint": "Cama, Guarda-roupa..." },
+        { "label": "Sala",            "hint": "Sofá, Mesa de centro..." },
+        { "label": "Cozinha",         "hint": "Geladeira, Fogão..." },
+        { "label": "Banheiro",        "hint": "Armário de banheiro..." },
+        { "label": "Escritório",      "hint": "Mesa, Cadeira, Estante..." },
+        { "label": "Área de serviço", "hint": "Máquina de lavar..." }
+      ]
+    },
+    "card": {
+      "progress": "Progresso",
+      "loadMap": "Carregar mapa",
+      "searching": "Buscando...",
+      "items": "{count, plural, one {# item} other {# itens}}",
+      "contracted": "Cotação contratada",
+      "status": {
+        "RASCUNHO": "Rascunho",
+        "AGUARDANDO_COTACAO": "Aguardando cotação",
+        "COTADO": "Cotado",
+        "CONFIRMADO": "Confirmado",
+        "EM_ANDAMENTO": "Em andamento",
+        "CONCLUIDO": "Concluído",
+        "CANCELADO": "Cancelado"
+      }
+    },
+    "delete": {
+      "title": "Excluir mudança?",
+      "description": "Esta ação não pode ser desfeita. Todos os itens, layout e cotações serão removidos permanentemente.",
+      "cancel": "Cancelar",
+      "confirm": "Excluir",
+      "button": "Excluir mudança"
+    },
+    "trial": {
+      "expiring": "Seu trial expira em {days, plural, one {# dia} other {# dias}}!",
+      "active": "Trial ativo — {days, plural, one {# dia restante} other {# dias restantes}} de acesso completo",
+      "subscribeCta": "Assinar PRO →"
+    },
+    "paywall": {
+      "title": "Recurso PRO",
+      "description": "Assine o MudaFácil PRO por R$ 29,90/mês para desbloquear este recurso.",
+      "cta": "Assinar PRO — R$ 29,90/mês"
+    }
   }
 }

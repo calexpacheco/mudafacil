@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import dynamic from 'next/dynamic'
 import { useEffect, useRef, useState } from 'react'
+import { useTranslations } from 'next-intl'
 import { MiniMapaPlaceholder } from './MiniMapa'
 import { IconTruck, IconMap, IconCurrencyDollar, IconCheck, IconCalendar, IconPackage } from '@tabler/icons-react'
 import { BotaoDeletarMudanca } from './BotaoDeletarMudanca'
@@ -44,6 +45,7 @@ export const STATUS_CONFIG: Record<string, { label: string; dot: string; badge: 
 // ─── Barra de progresso ───────────────────────────────────────────────────────
 
 function ProgressBar({ percentual, status }: { percentual: number; status: string }) {
+  const t = useTranslations('app.card')
   const barColor =
     status === 'CONCLUIDO'    ? 'bg-green-500'  :
     status === 'EM_ANDAMENTO' ? 'bg-orange-500' :
@@ -54,7 +56,7 @@ function ProgressBar({ percentual, status }: { percentual: number; status: strin
   return (
     <div className="flex flex-col gap-1">
       <div className="flex justify-between items-center">
-        <span className="text-xs text-gray-400">Progresso</span>
+        <span className="text-xs text-gray-400">{t('progress')}</span>
         <span className="text-xs font-semibold text-gray-700">{Math.round(percentual)}%</span>
       </div>
       <div className="w-full h-1.5 bg-gray-100 rounded-full overflow-hidden">
@@ -82,6 +84,7 @@ function MapArea({
   latDestino: number | null
   lngDestino: number | null
 }) {
+  const t = useTranslations('app.card')
   const [coords, setCoords] = useState({
     latOrigem, lngOrigem, latDestino, lngDestino,
   })
@@ -140,10 +143,10 @@ function MapArea({
           {loading ? (
             <>
               <span className="w-3 h-3 border-2 border-blue-600 border-t-transparent rounded-full animate-spin" />
-              Buscando...
+              {t('searching')}
             </>
           ) : (
-            <><IconMap size={14} stroke={1.5} className="text-blue-700" /> Carregar mapa</>
+            <><IconMap size={14} stroke={1.5} className="text-blue-700" /> {t('loadMap')}</>
           )}
         </button>
       </div>
@@ -158,6 +161,7 @@ function PrecoInline({ valorCentavos, melhorCotacaoCentavos, nomeTransportadora 
   melhorCotacaoCentavos: number | null
   nomeTransportadora: string | null
 }) {
+  const t = useTranslations('app.card')
   const fmt = (centavos: number) =>
     new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(centavos / 100)
 
@@ -178,7 +182,7 @@ function PrecoInline({ valorCentavos, melhorCotacaoCentavos, nomeTransportadora 
           <span className="text-sm font-bold text-green-700">{fmt(melhorCotacaoCentavos)}</span>
           <span className="text-[10px] text-gray-500 truncate flex items-center gap-0.5">
             <IconCheck size={10} stroke={2} className="text-green-600" />
-            {nomeTransportadora ?? 'Cotação contratada'}
+            {nomeTransportadora ?? t('contracted')}
           </span>
         </div>
       </div>
@@ -229,6 +233,8 @@ export function MudancaCard({
   latDestino,
   lngDestino,
 }: MudancaCardProps) {
+  const t = useTranslations('app.card')
+  const statusLabels = t.raw('status') as Record<string, string>
   const cfg = STATUS_CONFIG[status] ?? STATUS_CONFIG.RASCUNHO
   const caminhaoIconeSize = caminhaoTipo ? (CAMINHAO_SIZES[caminhaoTipo] ?? 16) : 16
 
@@ -251,7 +257,7 @@ export function MudancaCard({
         <div className="absolute top-2 left-2 z-10">
           <span className={`inline-flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-full font-semibold shadow-sm ${cfg.badge}`}>
             <span className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${cfg.dot}`} />
-            {cfg.label}
+            {statusLabels[status] ?? cfg.label}
           </span>
         </div>
         {/* Botão deletar sobreposto no mapa (canto direito) — z-index alto para ficar acima dos layers do Leaflet */}
@@ -311,7 +317,7 @@ export function MudancaCard({
 
           <div className="flex items-center gap-1.5">
             <IconPackage size={16} stroke={1.5} className="text-gray-500 flex-shrink-0" />
-            <span className="text-xs text-gray-600">{totalItens} iten{totalItens !== 1 ? 's' : ''}</span>
+            <span className="text-xs text-gray-600">{t('items', { count: totalItens })}</span>
           </div>
         </div>
 

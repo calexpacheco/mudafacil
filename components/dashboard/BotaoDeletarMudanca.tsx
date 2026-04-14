@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { useTranslations } from 'next-intl'
 import { IconTrash, IconAlertTriangle, IconX } from '@tabler/icons-react'
 import { createPortal } from 'react-dom'
 
@@ -16,6 +17,7 @@ function ConfirmModal({
   onCancel: () => void
   loading: boolean
 }) {
+  const t = useTranslations('app.delete')
   return createPortal(
     <div
       className="fixed inset-0 flex items-center justify-center p-4"
@@ -28,10 +30,8 @@ function ConfirmModal({
             <IconAlertTriangle size={20} stroke={2} className="text-red-600" />
           </div>
           <div>
-            <h3 className="text-base font-bold text-gray-900">Excluir mudança?</h3>
-            <p className="text-sm text-gray-500 mt-1">
-              Esta ação não pode ser desfeita. Todos os itens, layout e cotações serão removidos permanentemente.
-            </p>
+            <h3 className="text-base font-bold text-gray-900">{t('title')}</h3>
+            <p className="text-sm text-gray-500 mt-1">{t('description')}</p>
           </div>
           <button onClick={onCancel} className="p-1 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors flex-shrink-0">
             <IconX size={16} stroke={2} />
@@ -44,7 +44,7 @@ function ConfirmModal({
             disabled={loading}
             className="flex-1 py-2.5 rounded-xl border border-gray-200 text-gray-700 text-sm font-semibold hover:bg-gray-50 transition-colors disabled:opacity-50"
           >
-            Cancelar
+            {t('cancel')}
           </button>
           <button
             onClick={onConfirm}
@@ -54,7 +54,7 @@ function ConfirmModal({
             {loading ? (
               <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
             ) : (
-              <><IconTrash size={14} stroke={2} /> Excluir</>
+              <><IconTrash size={14} stroke={2} /> {t('confirm')}</>
             )}
           </button>
         </div>
@@ -80,6 +80,7 @@ export function BotaoDeletarMudanca({
   redirectTo = '/app/dashboard',
 }: BotaoDeletarMudancaProps) {
   const router = useRouter()
+  const t = useTranslations('app.delete')
   const [showConfirm, setShowConfirm] = useState(false)
   const [loading, setLoading] = useState(false)
 
@@ -113,7 +114,7 @@ export function BotaoDeletarMudanca({
           className="flex items-center gap-2 px-4 py-2 rounded-xl border border-red-200 text-red-600 text-sm font-semibold hover:bg-red-50 transition-colors"
         >
           <IconTrash size={15} stroke={1.5} />
-          Excluir mudança
+          {t('button')}
         </button>
       )}
 

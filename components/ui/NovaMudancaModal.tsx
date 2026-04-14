@@ -3,6 +3,7 @@
 import { useState, useMemo, useEffect } from 'react'
 import { createPortal } from 'react-dom'
 import { useRouter } from 'next/navigation'
+import { useTranslations } from 'next-intl'
 import {
   IconX, IconMapPin, IconCalendar, IconPackage,
   IconBed, IconArmchair, IconToolsKitchen2, IconBath,
@@ -15,12 +16,12 @@ import type { ItemPositionado } from '@/types/mudafacil'
 // ─── Estimativas por cômodo ─────────────────────────────────────────────────
 
 const COMODOS = [
-  { id: 'quarto',        label: 'Quarto',         hint: 'Cama, Guarda-roupa...', icon: IconBed,            itens: 8,  volumeM3: 5.0, pesoKg: 220 },
-  { id: 'sala',          label: 'Sala',            hint: 'Sofá, Mesa de centro...', icon: IconArmchair,     itens: 7,  volumeM3: 4.5, pesoKg: 180 },
-  { id: 'cozinha',       label: 'Cozinha',         hint: 'Geladeira, Fogão...', icon: IconToolsKitchen2,    itens: 6,  volumeM3: 2.8, pesoKg: 220 },
-  { id: 'banheiro',      label: 'Banheiro',        hint: 'Armário de banheiro...', icon: IconBath,          itens: 2,  volumeM3: 0.4, pesoKg: 15  },
-  { id: 'escritorio',    label: 'Escritório',      hint: 'Mesa, Cadeira, Estante...', icon: IconDeviceDesktop, itens: 5, volumeM3: 1.8, pesoKg: 90 },
-  { id: 'areadeservico', label: 'Área de serviço', hint: 'Máquina de lavar...', icon: IconWashMachine,      itens: 3,  volumeM3: 0.8, pesoKg: 110 },
+  { id: 'quarto',        icon: IconBed,            itens: 8,  volumeM3: 5.0, pesoKg: 220 },
+  { id: 'sala',          icon: IconArmchair,        itens: 7,  volumeM3: 4.5, pesoKg: 180 },
+  { id: 'cozinha',       icon: IconToolsKitchen2,   itens: 6,  volumeM3: 2.8, pesoKg: 220 },
+  { id: 'banheiro',      icon: IconBath,            itens: 2,  volumeM3: 0.4, pesoKg: 15  },
+  { id: 'escritorio',    icon: IconDeviceDesktop,   itens: 5,  volumeM3: 1.8, pesoKg: 90  },
+  { id: 'areadeservico', icon: IconWashMachine,     itens: 3,  volumeM3: 0.8, pesoKg: 110 },
 ] as const
 
 type ComodoId = typeof COMODOS[number]['id']
@@ -73,6 +74,8 @@ function fmt(centavos: number) {
 
 function ModalContent({ onClose }: { onClose: () => void }) {
   const router = useRouter()
+  const t = useTranslations('app.modal')
+  const tRooms = t.raw('rooms') as Array<{ label: string; hint: string }>
 
   const [origem, setOrigem]   = useState('')
   const [destino, setDestino] = useState('')
@@ -145,7 +148,7 @@ function ModalContent({ onClose }: { onClose: () => void }) {
         }),
       })
       const json = await res.json()
-      if (!res.ok) { setErro(json.error ?? 'Erro ao criar mudança'); return }
+      if (!res.ok) { setErro(json.error ?? t('errorConnection')); return }
 
       const mudancaId: string = json.id
 
@@ -177,7 +180,7 @@ function ModalContent({ onClose }: { onClose: () => void }) {
       handleClose()
       router.push(`/app/mudanca/${mudancaId}`)
     } catch {
-      setErro('Erro de conexão. Tente novamente.')
+      setErro(t('errorConnection'))
     } finally {
       setLoading(false)
     }
@@ -216,8 +219,8 @@ function ModalContent({ onClose }: { onClose: () => void }) {
         {/* Header */}
         <div className="flex items-start justify-between px-4 sm:px-6 pt-3 sm:pt-6 pb-2">
           <div>
-            <h2 className="text-lg sm:text-xl font-extrabold text-gray-900">Nova mudança</h2>
-            <p className="text-sm text-gray-400 mt-0.5">Informe os dados e receba estimativas instantâneas</p>
+            <h2 className="text-lg sm:text-xl font-extrabold text-gray-900">{t('title')}</h2>
+            <p className="text-sm text-gray-400 mt-0.5">{t('subtitle')}</p>
           </div>
           <button onClick={handleClose} className="p-1.5 rounded-lg text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors cursor-pointer">
             <IconX size={18} stroke={2} />
@@ -228,12 +231,12 @@ function ModalContent({ onClose }: { onClose: () => void }) {
 
           {/* Origem */}
           <div>
-            <label className="block text-sm font-semibold text-gray-800 mb-1.5">De onde você está saindo?</label>
+            <label className="block text-sm font-semibold text-gray-800 mb-1.5">{t('originLabel')}</label>
             <div className="relative">
               <IconMapPin size={16} stroke={1.5} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#E83500]" />
               <input
                 type="text" value={origem} onChange={(e) => setOrigem(e.target.value)}
-                placeholder="Ex: Rua Augusta, 500 – São Paulo, SP"
+                placeholder={t('originPlaceholder')}
                 className="w-full pl-9 pr-4 py-3 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-[#E83500] focus:border-[#E83500] placeholder:text-gray-300"
               />
             </div>
@@ -241,12 +244,12 @@ function ModalContent({ onClose }: { onClose: () => void }) {
 
           {/* Destino */}
           <div>
-            <label className="block text-sm font-semibold text-gray-800 mb-1.5">Para onde você vai?</label>
+            <label className="block text-sm font-semibold text-gray-800 mb-1.5">{t('destinationLabel')}</label>
             <div className="relative">
               <IconMapPin size={16} stroke={1.5} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
               <input
                 type="text" value={destino} onChange={(e) => setDestino(e.target.value)}
-                placeholder="Ex: Av. Paulista, 1578 – São Paulo, SP"
+                placeholder={t('destinationPlaceholder')}
                 className="w-full pl-9 pr-4 py-3 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-[#E83500] focus:border-[#E83500] placeholder:text-gray-300"
               />
             </div>
@@ -256,18 +259,19 @@ function ModalContent({ onClose }: { onClose: () => void }) {
           <div>
             <label className="flex items-center gap-2 text-sm font-semibold text-gray-800 mb-2.5">
               <IconPackage size={16} stroke={1.5} className="text-gray-500" />
-              Quais cômodos tem na sua casa?
+              {t('roomsLabel')}
             </label>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '10px' }}>
-              {COMODOS.map((comodo) => {
+              {COMODOS.map((comodo, idx) => {
                 const Icon = comodo.icon
                 const count = qtd[comodo.id]
+                const room = tRooms[idx]
                 return (
                   <div key={comodo.id} style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '10px 12px', borderRadius: '12px', border: '1px solid #e5e7eb', background: '#fafafa' }}>
                     <Icon size={18} stroke={1.5} style={{ color: '#9ca3af', flexShrink: 0 }} />
                     <div style={{ flex: 1, minWidth: 0 }}>
-                      <p style={{ fontSize: '13px', fontWeight: 600, color: '#111827', lineHeight: 1.2 }}>{comodo.label}</p>
-                      <p style={{ fontSize: '11px', color: '#9ca3af', lineHeight: 1.2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{comodo.hint}</p>
+                      <p style={{ fontSize: '13px', fontWeight: 600, color: '#111827', lineHeight: 1.2 }}>{room.label}</p>
+                      <p style={{ fontSize: '11px', color: '#9ca3af', lineHeight: 1.2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{room.hint}</p>
                     </div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexShrink: 0 }}>
                       <button onClick={() => change(comodo.id, -1)} style={{ width: 24, height: 24, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 6, border: '1px solid #e5e7eb', background: 'white', fontSize: 16, fontWeight: 700, color: '#6b7280', cursor: 'pointer' }}>−</button>
@@ -282,7 +286,7 @@ function ModalContent({ onClose }: { onClose: () => void }) {
 
           {/* Data */}
           <div>
-            <label className="block text-sm font-semibold text-gray-800 mb-1.5">Quando você quer mudar?</label>
+            <label className="block text-sm font-semibold text-gray-800 mb-1.5">{t('dateLabel')}</label>
             <div className="relative">
               <IconCalendar size={16} stroke={1.5} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
               <input
@@ -291,37 +295,37 @@ function ModalContent({ onClose }: { onClose: () => void }) {
                 className="w-full pl-9 pr-4 py-3 rounded-xl border border-gray-200 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#E83500] focus:border-[#E83500] cursor-pointer"
               />
             </div>
-            <p className="text-xs text-gray-400 mt-1">Escolha uma data aproximada — você pode alterar depois</p>
+            <p className="text-xs text-gray-400 mt-1">{t('dateHint')}</p>
           </div>
 
           {/* Estimativa */}
           {estimativa && (
             <div className="rounded-xl border border-[#FA9370] bg-[#FFF8F6] px-4 py-3.5 flex flex-col gap-2">
-              <p className="text-xs font-bold text-[#E83500] uppercase tracking-widest">Estimativa instantânea</p>
+              <p className="text-xs font-bold text-[#E83500] uppercase tracking-widest">{t('estimateTitle')}</p>
               <div className="flex items-center gap-4 flex-wrap">
                 <div className="flex flex-col">
-                  <span className="text-[10px] text-gray-400 uppercase">Itens aprox.</span>
+                  <span className="text-[10px] text-gray-400 uppercase">{t('estimateItems')}</span>
                   <span className="text-lg font-extrabold text-gray-900">{estimativa.totalItens}</span>
                 </div>
                 <div className="w-px h-8 bg-[#FA9370]/40" />
                 <div className="flex flex-col">
-                  <span className="text-[10px] text-gray-400 uppercase">Volume aprox.</span>
+                  <span className="text-[10px] text-gray-400 uppercase">{t('estimateVolume')}</span>
                   <span className="text-lg font-extrabold text-gray-900">{estimativa.totalVol.toFixed(1)} m³</span>
                 </div>
                 <div className="w-px h-8 bg-[#FA9370]/40" />
                 <div className="flex flex-col">
-                  <span className="text-[10px] text-gray-400 uppercase">Veículo sugerido</span>
+                  <span className="text-[10px] text-gray-400 uppercase">{t('estimateVehicle')}</span>
                   <span className="text-sm font-bold text-gray-900">{estimativa.caminhao.nome}</span>
                 </div>
                 <div className="w-px h-8 bg-[#FA9370]/40" />
                 <div className="flex flex-col">
-                  <span className="text-[10px] text-gray-400 uppercase">Faixa de preço</span>
+                  <span className="text-[10px] text-gray-400 uppercase">{t('estimatePrice')}</span>
                   <span className="text-sm font-bold text-[#E83500]">{fmt(estimativa.precoMin)} – {fmt(estimativa.precoMax)}</span>
                 </div>
               </div>
               <p className="text-[10px] text-gray-400 flex items-center gap-1">
                 <IconChevronRight size={10} stroke={2} />
-                Cotações reais disponíveis após criar a mudança
+                {t('estimateHint')}
               </p>
             </div>
           )}
@@ -332,14 +336,14 @@ function ModalContent({ onClose }: { onClose: () => void }) {
           {/* Botões */}
           <div className="flex gap-3 pt-1">
             <button onClick={handleClose} className="flex-1 py-3 rounded-xl border border-gray-200 text-gray-700 text-sm font-semibold hover:bg-gray-50 transition-colors cursor-pointer">
-              Cancelar
+              {t('cancel')}
             </button>
             <button
               onClick={handleSubmit}
               disabled={!podeSubmit || loading}
               className="flex-1 py-3 rounded-xl bg-[#E83500] text-white text-sm font-bold hover:bg-[#C42A08] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {loading ? 'Criando...' : 'Criar mudança'}
+              {loading ? t('submitting') : t('submit')}
             </button>
           </div>
 

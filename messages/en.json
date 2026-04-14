@@ -134,5 +134,87 @@
     "terms": "Terms of use",
     "privacy": "Privacy",
     "support": "Support"
+  },
+  "app": {
+    "newMove": "New Move",
+    "notifications": "Notifications",
+    "signOut": "Sign out",
+    "nav": {
+      "tagline": "Organize your move",
+      "myMoves": "My Moves",
+      "catalog": "Item Catalog",
+      "billing": "Plans & Billing"
+    },
+    "dashboard": {
+      "title": "My Moves",
+      "subtitle": "Manage and plan your moves"
+    },
+    "empty": {
+      "title": "No moves yet",
+      "description": "Create your first move and plan it visually with drag & drop.",
+      "cta": "Plan my move"
+    },
+    "modal": {
+      "title": "New move",
+      "subtitle": "Enter details and get instant estimates",
+      "originLabel": "Where are you moving from?",
+      "originPlaceholder": "e.g. 123 Main St, New York, NY",
+      "destinationLabel": "Where are you moving to?",
+      "destinationPlaceholder": "e.g. 456 Oak Ave, Brooklyn, NY",
+      "roomsLabel": "Which rooms does your home have?",
+      "dateLabel": "When do you want to move?",
+      "dateHint": "Choose an approximate date — you can change it later",
+      "estimateTitle": "Instant estimate",
+      "estimateItems": "Approx. items",
+      "estimateVolume": "Approx. volume",
+      "estimateVehicle": "Suggested vehicle",
+      "estimatePrice": "Price range",
+      "estimateHint": "Real quotes available after creating the move",
+      "cancel": "Cancel",
+      "submit": "Create move",
+      "submitting": "Creating...",
+      "errorConnection": "Connection error. Please try again.",
+      "rooms": [
+        { "label": "Bedroom",       "hint": "Bed, Wardrobe..." },
+        { "label": "Living Room",   "hint": "Sofa, Coffee table..." },
+        { "label": "Kitchen",       "hint": "Fridge, Stove..." },
+        { "label": "Bathroom",      "hint": "Bathroom cabinet..." },
+        { "label": "Office",        "hint": "Desk, Chair, Shelf..." },
+        { "label": "Utility Room",  "hint": "Washing machine..." }
+      ]
+    },
+    "card": {
+      "progress": "Progress",
+      "loadMap": "Load map",
+      "searching": "Searching...",
+      "items": "{count, plural, one {# item} other {# items}}",
+      "contracted": "Contracted quote",
+      "status": {
+        "RASCUNHO": "Draft",
+        "AGUARDANDO_COTACAO": "Awaiting quote",
+        "COTADO": "Quoted",
+        "CONFIRMADO": "Confirmed",
+        "EM_ANDAMENTO": "In progress",
+        "CONCLUIDO": "Completed",
+        "CANCELADO": "Cancelled"
+      }
+    },
+    "delete": {
+      "title": "Delete move?",
+      "description": "This action cannot be undone. All items, layout and quotes will be permanently removed.",
+      "cancel": "Cancel",
+      "confirm": "Delete",
+      "button": "Delete move"
+    },
+    "trial": {
+      "expiring": "Your trial expires in {days, plural, one {# day} other {# days}}!",
+      "active": "Trial active — {days, plural, one {# day remaining} other {# days remaining}} of full access",
+      "subscribeCta": "Subscribe PRO →"
+    },
+    "paywall": {
+      "title": "PRO Feature",
+      "description": "Subscribe to MudaFácil PRO for $9.90/month to unlock this feature.",
+      "cta": "Subscribe PRO — $9.90/month"
+    }
   }
 }

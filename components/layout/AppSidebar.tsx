@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import { useTranslations } from 'next-intl'
 import { cn } from '@/design-system/utils'
 import { IconPackage, IconCategory2, IconCreditCard, IconTruck, IconX } from '@tabler/icons-react'
 
@@ -13,13 +14,14 @@ interface AppSidebarProps {
 }
 
 const NAV_LINKS = [
-  { href: '/app/dashboard', label: 'Minhas Mudanças',    Icon: IconPackage },
-  { href: '/app/catalogo',  label: 'Catálogo de Itens',  Icon: IconCategory2 },
-  { href: '/app/billing',   label: 'Planos e Pagamentos', Icon: IconCreditCard },
+  { href: '/app/dashboard', key: 'myMoves',  Icon: IconPackage },
+  { href: '/app/catalogo',  key: 'catalog',  Icon: IconCategory2 },
+  { href: '/app/billing',   key: 'billing',  Icon: IconCreditCard },
 ]
 
 export function AppSidebar({ userName, userEmail, mobileOpen = false, onMobileClose }: AppSidebarProps) {
   const pathname = usePathname()
+  const t = useTranslations('app')
   const initial = (userName || 'U').charAt(0).toUpperCase()
 
   return (
@@ -43,7 +45,7 @@ export function AppSidebar({ userName, userEmail, mobileOpen = false, onMobileCl
             <p className="font-bold text-gray-900 text-base leading-tight">
               Muda<span className="text-[#E83500]">Fácil</span>
             </p>
-            <p className="text-[11px] text-gray-400 leading-snug">Organize sua mudança</p>
+            <p className="text-[11px] text-gray-400 leading-snug">{t('nav.tagline')}</p>
           </div>
         </Link>
 
@@ -58,7 +60,7 @@ export function AppSidebar({ userName, userEmail, mobileOpen = false, onMobileCl
 
       {/* ─── Nav links ─────────────────────────────────────────────────────── */}
       <nav className="flex-1 px-3 py-3 space-y-0.5 overflow-y-auto">
-        {NAV_LINKS.map(({ href, label, Icon }) => {
+        {NAV_LINKS.map(({ href, key, Icon }) => {
           const isActive =
             pathname === href ||
             (href !== '/app/dashboard' && pathname.startsWith(href + '/')) ||
@@ -76,7 +78,7 @@ export function AppSidebar({ userName, userEmail, mobileOpen = false, onMobileCl
               )}
             >
               <Icon size={18} stroke={1.5} className="flex-shrink-0" />
-              {label}
+              {t(`nav.${key}`)}
             </Link>
           )
         })}

@@ -3,6 +3,7 @@
 import { hasAccess, daysLeftInTrial } from '@/lib/subscription'
 import type { Plan } from '@/lib/prisma-types'
 import { cn } from '@/design-system/utils'
+import { useTranslations } from 'next-intl'
 import { IconAlertTriangle, IconConfetti, IconLock } from '@tabler/icons-react'
 
 interface UserInfo {
@@ -25,6 +26,7 @@ export function PaywallGate({ user, children, fallback }: PaywallGateProps) {
 }
 
 export function TrialBanner({ user }: { user: UserInfo }) {
+  const t = useTranslations('app.trial')
   if (user.plan !== 'TRIAL') return null
 
   const days = daysLeftInTrial(user)
@@ -39,36 +41,35 @@ export function TrialBanner({ user }: { user: UserInfo }) {
     >
       <span className="flex items-center gap-1.5">
         {isExpiring
-          ? <><IconAlertTriangle size={16} stroke={2} className="text-white flex-shrink-0" /> Seu trial expira em {days} dia{days !== 1 ? 's' : ''}!</>
-          : <><IconConfetti size={16} stroke={1.5} className="text-white flex-shrink-0" /> Trial ativo — {days} dias restantes de acesso completo</>}
+          ? <><IconAlertTriangle size={16} stroke={2} className="text-white flex-shrink-0" /> {t('expiring', { days })}</>
+          : <><IconConfetti size={16} stroke={1.5} className="text-white flex-shrink-0" /> {t('active', { days })}</>}
       </span>
       <a
         href="/app/billing"
         className="ml-4 text-xs px-3 py-1 rounded-full bg-white/20 hover:bg-white/30 transition-colors whitespace-nowrap"
       >
-        Assinar PRO →
+        {t('subscribeCta')}
       </a>
     </div>
   )
 }
 
 function UpgradePrompt() {
+  const t = useTranslations('app.paywall')
   return (
     <div className="flex flex-col items-center justify-center gap-4 py-12 px-6 text-center rounded-xl border-2 border-dashed border-blue-200 bg-blue-50">
       <div className="w-16 h-16 rounded-2xl bg-blue-100 flex items-center justify-center">
         <IconLock size={32} stroke={1.5} className="text-blue-600" />
       </div>
       <div>
-        <p className="font-semibold text-gray-900">Recurso PRO</p>
-        <p className="text-sm text-gray-500 mt-1">
-          Assine o MudaFácil PRO por R$ 29,90/mês para desbloquear este recurso.
-        </p>
+        <p className="font-semibold text-gray-900">{t('title')}</p>
+        <p className="text-sm text-gray-500 mt-1">{t('description')}</p>
       </div>
       <a
         href="/app/billing"
         className="px-6 py-2.5 rounded-lg bg-blue-600 text-white text-sm font-semibold hover:bg-blue-700 transition-colors"
       >
-        Assinar PRO — R$ 29,90/mês
+        {t('cta')}
       </a>
     </div>
   )

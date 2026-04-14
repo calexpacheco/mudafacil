@@ -32,7 +32,7 @@ export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="pt-BR" className={`${inter.variable} ${barlow.variable} h-full antialiased`}>
+    <html lang="pt" className={`${inter.variable} ${barlow.variable} h-full antialiased`}>
       <body className="min-h-full flex flex-col bg-[#F8FAFC] text-gray-900">
         {children}
         <Toaster position="bottom-center" richColors />

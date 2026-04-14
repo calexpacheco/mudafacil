@@ -1,0 +1,138 @@
+{
+  "nav": {
+    "features": "Recursos",
+    "pricing": "Preços",
+    "myMoves": "Minhas Mudanças",
+    "signIn": "Entrar",
+    "signOut": "Sair",
+    "startFree": "Começar grátis"
+  },
+  "hero": {
+    "badge": "7 dias grátis para testar — sem cartão de crédito",
+    "headline1": "Planeje sua mudança em minutos",
+    "headline2": "e escolha a melhor opção",
+    "headline3": "sem dor de cabeça",
+    "subheadline": "Informe o que você precisa levar e receba cotações de empresas confiáveis na sua região — simples, rápido e sem compromisso.",
+    "ctaPrimary": "Planejar minha mudança grátis →",
+    "ctaSecondary": "Ver como funciona",
+    "socialRating": "4.9 de satisfação",
+    "socialMoves": "Mais de 2.000 mudanças planejadas com satisfação",
+    "socialVerified": "Empresas verificadas e avaliadas"
+  },
+  "features": {
+    "title": "Tudo para organizar sua mudança sem estresse",
+    "subtitle": "Do planejamento à escolha da empresa, tudo em um só lugar.",
+    "items": [
+      {
+        "title": "Liste tudo que você precisa levar",
+        "description": "Adicione seus móveis e caixas de forma simples e veja tudo organizado em um só lugar. Sem planilhas, sem papel."
+      },
+      {
+        "title": "Escolha o tamanho ideal sem erro",
+        "description": "Descubra qual caminhão atende sua mudança sem pagar a mais por espaço desnecessário. A gente faz a conta por você."
+      },
+      {
+        "title": "Compare e escolha com confiança",
+        "description": "Veja preços, avaliações e escolha a melhor opção para sua mudança. Tudo claro e transparente, sem surpresas."
+      },
+      {
+        "title": "Mais de 40 itens prontos para usar",
+        "description": "Cama, sofá, geladeira, caixas e muito mais — já cadastrados e organizados por cômodo. É só selecionar o que você tem."
+      },
+      {
+        "title": "Veja o quanto já está organizado",
+        "description": "Acompanhe em tempo real o volume total e o espaço ocupado no caminhão. Você sabe exatamente o que cabe antes de contratar."
+      },
+      {
+        "title": "Só empresas de confiança",
+        "description": "Todas as transportadoras são verificadas e têm avaliações reais de outros clientes. Você escolhe com segurança."
+      }
+    ]
+  },
+  "howItWorks": {
+    "title": "Organize sua mudança em poucos passos",
+    "subtitle": "Rápido, simples e sem complicação.",
+    "steps": [
+      {
+        "title": "Informe sua mudança",
+        "desc": "Diga de onde para onde você vai e o que precisa levar."
+      },
+      {
+        "title": "Organize seus itens",
+        "desc": "Liste seus móveis e veja tudo de forma clara e organizada."
+      },
+      {
+        "title": "Receba cotações",
+        "desc": "Compare preços e escolha a melhor empresa."
+      },
+      {
+        "title": "Agende com tranquilidade",
+        "desc": "Combine tudo direto com a transportadora escolhida."
+      }
+    ]
+  },
+  "testimonials": {
+    "badge": "Clientes satisfeitos",
+    "title": "Quem usa,",
+    "titleHighlight": "recomenda",
+    "subtitle": "Milhares de pessoas já planejaram sua mudança com mais tranquilidade. Depois que usam, não querem mais fazer mudança do jeito antigo.",
+    "items": [
+      {
+        "text": "Organizei tudo em menos de 1 hora. A transparência nos preços me deu uma segurança que nunca tive em outras mudanças."
+      },
+      {
+        "text": "Sabia exatamente o que caberia no caminhão antes mesmo de contratar. Nunca pensei que planejar uma mudança podia ser assim."
+      },
+      {
+        "text": "Nossa primeira mudança e foi perfeita. Sem susto no preço final, sem improvisação. Recomendo demais!"
+      }
+    ]
+  },
+  "pricing": {
+    "title": "Comece grátis e evolua quando precisar",
+    "subtitle": "Sem compromisso. Você só paga quando quiser mais recursos.",
+    "free": {
+      "label": "Free",
+      "price": "R$ 0",
+      "period": "para sempre",
+      "features": [
+        "1 mudança ativa",
+        "Até 5 itens cadastrados",
+        "3 cotações por mudança"
+      ],
+      "missing": ["Filtros avançados"],
+      "cta": "Começar grátis"
+    },
+    "popular": {
+      "badge": "🔥 Mais escolhido",
+      "label": "Popular",
+      "price": "R$ 29,90",
+      "period": "/mês · 7 dias grátis para testar",
+      "features": [
+        "Mudanças ilimitadas",
+        "Itens ilimitados",
+        "Comparação completa de preços",
+        "Filtros avançados",
+        "Suporte prioritário"
+      ],
+      "cta": "Testar grátis por 7 dias"
+    },
+    "pro": {
+      "label": "PRO",
+      "price": "R$ 79,90",
+      "period": "/mês",
+      "features": [
+        "Tudo do plano Popular",
+        "Prioridade nas melhores cotações",
+        "Atendimento dedicado",
+        "Recursos avançados (em breve)"
+      ],
+      "cta": "Assinar Pro"
+    }
+  },
+  "footer": {
+    "terms": "Termos de uso",
+    "privacy": "Privacidade",
+    "support": "Suporte"
+  }
+}

@@ -1,0 +1,138 @@
+{
+  "nav": {
+    "features": "Features",
+    "pricing": "Pricing",
+    "myMoves": "My Moves",
+    "signIn": "Sign in",
+    "signOut": "Sign out",
+    "startFree": "Start for free"
+  },
+  "hero": {
+    "badge": "7 days free trial — no credit card required",
+    "headline1": "Plan your move in minutes",
+    "headline2": "and choose the best option",
+    "headline3": "without the headache",
+    "subheadline": "Tell us what you need to move and receive quotes from trusted companies in your area — simple, fast and no commitment.",
+    "ctaPrimary": "Plan my move for free →",
+    "ctaSecondary": "See how it works",
+    "socialRating": "4.9 satisfaction score",
+    "socialMoves": "Over 2,000 moves planned with satisfaction",
+    "socialVerified": "Verified and rated companies"
+  },
+  "features": {
+    "title": "Everything to organize your move stress-free",
+    "subtitle": "From planning to choosing the company, all in one place.",
+    "items": [
+      {
+        "title": "List everything you need to move",
+        "description": "Add your furniture and boxes simply and see everything organized in one place. No spreadsheets, no paper."
+      },
+      {
+        "title": "Choose the right size without guessing",
+        "description": "Find out which truck fits your move without overpaying for unnecessary space. We do the math for you."
+      },
+      {
+        "title": "Compare and choose with confidence",
+        "description": "See prices, reviews and choose the best option for your move. Clear and transparent, no surprises."
+      },
+      {
+        "title": "Over 40 items ready to use",
+        "description": "Bed, sofa, fridge, boxes and more — already listed and organized by room. Just select what you have."
+      },
+      {
+        "title": "See how much is already organized",
+        "description": "Track in real time the total volume and space used in the truck. You know exactly what fits before booking."
+      },
+      {
+        "title": "Only trusted companies",
+        "description": "All carriers are verified and have real reviews from other customers. You choose with peace of mind."
+      }
+    ]
+  },
+  "howItWorks": {
+    "title": "Organize your move in a few steps",
+    "subtitle": "Fast, simple and hassle-free.",
+    "steps": [
+      {
+        "title": "Tell us about your move",
+        "desc": "Share where you're moving from and to, and what you need to take."
+      },
+      {
+        "title": "Organize your items",
+        "desc": "List your furniture and see everything clearly organized."
+      },
+      {
+        "title": "Receive quotes",
+        "desc": "Compare prices and choose the best company."
+      },
+      {
+        "title": "Book with peace of mind",
+        "desc": "Arrange everything directly with your chosen carrier."
+      }
+    ]
+  },
+  "testimonials": {
+    "badge": "Happy customers",
+    "title": "Those who use it,",
+    "titleHighlight": "recommend it",
+    "subtitle": "Thousands of people have already planned their move with peace of mind. Once they use it, they never want to move the old way again.",
+    "items": [
+      {
+        "text": "I organized everything in less than 1 hour. The price transparency gave me a confidence I never had in other moves."
+      },
+      {
+        "text": "I knew exactly what would fit in the truck before even booking. I never thought planning a move could be this easy."
+      },
+      {
+        "text": "Our first move and it was perfect. No price surprises, no improvising. Highly recommend!"
+      }
+    ]
+  },
+  "pricing": {
+    "title": "Start free and upgrade when you need",
+    "subtitle": "No commitment. You only pay when you want more features.",
+    "free": {
+      "label": "Free",
+      "price": "$0",
+      "period": "forever",
+      "features": [
+        "1 active move",
+        "Up to 5 registered items",
+        "3 quotes per move"
+      ],
+      "missing": ["Advanced filters"],
+      "cta": "Start for free"
+    },
+    "popular": {
+      "badge": "🔥 Most popular",
+      "label": "Popular",
+      "price": "$9.90",
+      "period": "/month · 7 days free trial",
+      "features": [
+        "Unlimited moves",
+        "Unlimited items",
+        "Full price comparison",
+        "Advanced filters",
+        "Priority support"
+      ],
+      "cta": "Try free for 7 days"
+    },
+    "pro": {
+      "label": "PRO",
+      "price": "$24.90",
+      "period": "/month",
+      "features": [
+        "Everything in Popular",
+        "Priority on best quotes",
+        "Dedicated support",
+        "Advanced features (coming soon)"
+      ],
+      "cta": "Subscribe Pro"
+    }
+  },
+  "footer": {
+    "terms": "Terms of use",
+    "privacy": "Privacy",
+    "support": "Support"
+  }
+}

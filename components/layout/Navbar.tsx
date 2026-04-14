@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { auth } from '@/lib/auth'
 import { signOut } from '@/lib/auth'
 import { IconTruck } from '@tabler/icons-react'
+import { LocaleSwitcher } from '@/components/ui/LocaleSwitcher'
 
 export async function Navbar() {
   const session = await auth()
@@ -24,6 +25,7 @@ export async function Navbar() {
         </nav>
 
         <div className="flex items-center gap-3">
+          <LocaleSwitcher />
           {session ? (
             <>
               <Link

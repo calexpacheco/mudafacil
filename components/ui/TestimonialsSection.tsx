@@ -2,37 +2,20 @@
 
 import { motion } from 'framer-motion'
 import { useEffect, useRef, useState } from 'react'
+import { useTranslations } from 'next-intl'
 import { IconStar } from '@tabler/icons-react'
 
-// ─── Dados ─────────────────────────────────────────────────────────────────
-
-const testimonials = [
-  {
-    name: 'Ana Beatriz S.',
-    city: 'São Paulo, SP',
-    text: 'Organizei tudo em menos de 1 hora. A transparência nos preços me deu uma segurança que nunca tive em outras mudanças.',
-    avatar: '/people-01.png',
-  },
-  {
-    name: 'Rodrigo M.',
-    city: 'Belo Horizonte, MG',
-    text: 'O canvas de carga me surpreendeu — sabia exatamente o que caberia no caminhão antes mesmo de contratar.',
-    avatar: '/people-05.png',
-  },
-  {
-    name: 'Camila e Felipe T.',
-    city: 'Curitiba, PR',
-    text: 'Nossa primeira mudança e foi perfeita. Sem susto no preço final, sem improvisação. Recomendo demais!',
-    avatar: '/people-09.png',
-  },
+// Dados estáticos — nome/cidade/avatar não mudam por idioma
+const PEOPLE = [
+  { name: 'Ana Beatriz S.', city: 'São Paulo, SP',       avatar: '/people-01.png' },
+  { name: 'Rodrigo M.',     city: 'Belo Horizonte, MG',  avatar: '/people-05.png' },
+  { name: 'Camila e Felipe T.', city: 'Curitiba, PR',    avatar: '/people-09.png' },
 ]
 
 const squareData = Array.from({ length: 16 }, (_, i) => ({
   id: i + 1,
   src: `/people-${String(i + 1).padStart(2, '0')}.png`,
 }))
-
-// ─── Shuffle ────────────────────────────────────────────────────────────────
 
 function shuffle<T>(array: T[]): T[] {
   const arr = [...array]
@@ -59,12 +42,8 @@ function generateSquares() {
   ))
 }
 
-// ─── ShuffleGrid ────────────────────────────────────────────────────────────
-
 function ShuffleGrid() {
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
-  // Inicia com ordem fixa (determinística) para evitar hydration mismatch.
-  // O shuffle começa apenas no cliente, dentro do useEffect.
   const [squares, setSquares] = useState(() => squareData.map((sq) => (
     <motion.div
       key={sq.id}
@@ -84,11 +63,8 @@ function ShuffleGrid() {
       setSquares(generateSquares())
       timeoutRef.current = setTimeout(run, 3000)
     }
-    // Aguarda um tick para não conflitar com a hidratação inicial
     timeoutRef.current = setTimeout(run, 3000)
-    return () => {
-      if (timeoutRef.current) clearTimeout(timeoutRef.current)
-    }
+    return () => { if (timeoutRef.current) clearTimeout(timeoutRef.current) }
   }, [])
 
   return (
@@ -98,15 +74,14 @@ function ShuffleGrid() {
   )
 }
 
-// ─── Section Principal ──────────────────────────────────────────────────────
-
 export function TestimonialsSection() {
+  const t = useTranslations('testimonials')
+  const items = t.raw('items') as Array<{ text: string }>
+
   const sectionRef = useRef<HTMLElement>(null)
-  const headerRef = useRef<HTMLDivElement>(null)
+  const headerRef  = useRef<HTMLDivElement>(null)
   const [headerVisible, setHeaderVisible] = useState(false)
-  const [visibleCards, setVisibleCards] = useState<boolean[]>(
-    Array(testimonials.length).fill(false)
-  )
+  const [visibleCards, setVisibleCards]   = useState<boolean[]>(Array(PEOPLE.length).fill(false))
 
   useEffect(() => {
     const observers: IntersectionObserver[] = []
@@ -126,14 +101,14 @@ export function TestimonialsSection() {
       const obs = new IntersectionObserver(
         ([entry]) => {
           if (entry.isIntersecting) {
-            const t = setTimeout(() => {
+            const timer = setTimeout(() => {
               setVisibleCards((prev) => {
                 const next = [...prev]
                 next[i] = true
                 return next
               })
             }, i * 120)
-            timers.push(t)
+            timers.push(timer)
           } else {
             setVisibleCards((prev) => {
               const next = [...prev]
@@ -150,18 +125,14 @@ export function TestimonialsSection() {
 
     return () => {
       observers.forEach((o) => o.disconnect())
-      timers.forEach((t) => clearTimeout(t))
+      timers.forEach((timer) => clearTimeout(timer))
     }
   }, [])
 
   return (
-    <section
-      ref={sectionRef}
-      className="py-16 px-4 sm:px-6 lg:px-8 bg-[#F8FAFC]"
-    >
+    <section ref={sectionRef} className="py-16 px-4 sm:px-6 lg:px-8 bg-[#F8FAFC]">
       <div className="max-w-6xl mx-auto flex flex-col gap-10">
 
-        {/* Linha de cima: header esquerda + grid direita */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 items-center">
 
           {/* Header */}
@@ -174,28 +145,27 @@ export function TestimonialsSection() {
             }}
           >
             <span className="inline-block mb-3 text-xs font-bold text-[#E83500] uppercase tracking-widest">
-              Clientes satisfeitos
+              {t('badge')}
             </span>
             <h2 className="text-3xl sm:text-4xl font-extrabold text-gray-900 leading-tight mb-4">
-              Quem usa,{' '}
-              <span className="text-[#E83500]">recomenda</span>
+              {t('title')}{' '}
+              <span className="text-[#E83500]">{t('titleHighlight')}</span>
             </h2>
             <p className="text-gray-500 text-base leading-relaxed max-w-md">
-              Milhares de pessoas já planejaram sua mudança com mais tranquilidade. Depois que usam, não querem mais fazer mudança do jeito antigo.
+              {t('subtitle')}
             </p>
           </div>
 
-          {/* Shuffle grid — só desktop */}
           <div className="hidden lg:block">
             <ShuffleGrid />
           </div>
         </div>
 
-        {/* Linha de baixo: 3 cards lado a lado */}
+        {/* Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          {testimonials.map((t, i) => (
+          {PEOPLE.map((person, i) => (
             <div
-              key={t.name}
+              key={person.name}
               data-testimonial
               style={{
                 opacity: visibleCards[i] ? 1 : 0,
@@ -206,18 +176,17 @@ export function TestimonialsSection() {
               }}
               className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 flex flex-col gap-3"
             >
-              {/* Avatar + autor */}
               <div className="flex items-center gap-3">
                 <div
                   className="w-10 h-10 rounded-full bg-gray-200 flex-shrink-0"
                   style={{
-                    backgroundImage: `url(${t.avatar})`,
+                    backgroundImage: `url(${person.avatar})`,
                     backgroundSize: 'cover',
                     backgroundPosition: 'center top',
                   }}
                 />
                 <div>
-                  <p className="text-sm font-semibold text-gray-900 leading-tight">{t.name}</p>
+                  <p className="text-sm font-semibold text-gray-900 leading-tight">{person.name}</p>
                   <div className="flex gap-0.5 mt-0.5">
                     {Array.from({ length: 5 }).map((_, s) => (
                       <IconStar key={s} size={11} className="text-[#F59E0B] fill-[#F59E0B]" />
@@ -226,12 +195,11 @@ export function TestimonialsSection() {
                 </div>
               </div>
 
-              {/* Quote */}
               <p className="text-gray-600 text-sm leading-relaxed">
-                &ldquo;{t.text}&rdquo;
+                &ldquo;{items[i]?.text}&rdquo;
               </p>
 
-              <p className="text-xs text-gray-400">{t.city}</p>
+              <p className="text-xs text-gray-400">{person.city}</p>
             </div>
           ))}
         </div>

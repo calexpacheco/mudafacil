@@ -1,25 +1,23 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
+import { useTranslations } from 'next-intl'
 
-const steps = [
-  { num: '01', title: 'Informe sua mudança', desc: 'Diga de onde para onde você vai e o que precisa levar.' },
-  { num: '02', title: 'Organize seus itens', desc: 'Liste seus móveis e veja tudo de forma clara e organizada.' },
-  { num: '03', title: 'Receba cotações', desc: 'Compare preços e escolha a melhor empresa.' },
-  { num: '04', title: 'Agende com tranquilidade', desc: 'Combine tudo direto com a transportadora escolhida.' },
-]
+const STEP_NUMS = ['01', '02', '03', '04']
 
 export function HowItWorksSection() {
+  const t = useTranslations('howItWorks')
+  const steps = t.raw('steps') as Array<{ title: string; desc: string }>
+
   const sectionRef = useRef<HTMLElement>(null)
   const headerRef = useRef<HTMLDivElement>(null)
   const [headerVisible, setHeaderVisible] = useState(false)
-  const [visibleSteps, setVisibleSteps] = useState<boolean[]>(Array(steps.length).fill(false))
+  const [visibleSteps, setVisibleSteps] = useState<boolean[]>(Array(STEP_NUMS.length).fill(false))
 
   useEffect(() => {
     const observers: IntersectionObserver[] = []
     const timers: ReturnType<typeof setTimeout>[] = []
 
-    // Header fade
     if (headerRef.current) {
       const obs = new IntersectionObserver(
         ([entry]) => setHeaderVisible(entry.isIntersecting),
@@ -29,20 +27,19 @@ export function HowItWorksSection() {
       observers.push(obs)
     }
 
-    // Cada step com stagger em ordem 01→05
     const stepEls = sectionRef.current?.querySelectorAll('[data-step]')
     stepEls?.forEach((el, i) => {
       const obs = new IntersectionObserver(
         ([entry]) => {
           if (entry.isIntersecting) {
-            const t = setTimeout(() => {
+            const timer = setTimeout(() => {
               setVisibleSteps(prev => {
                 const next = [...prev]
                 next[i] = true
                 return next
               })
             }, i * 120)
-            timers.push(t)
+            timers.push(timer)
           } else {
             setVisibleSteps(prev => {
               const next = [...prev]
@@ -59,7 +56,7 @@ export function HowItWorksSection() {
 
     return () => {
       observers.forEach(o => o.disconnect())
-      timers.forEach(t => clearTimeout(t))
+      timers.forEach(timer => clearTimeout(timer))
     }
   }, [])
 
@@ -77,7 +74,6 @@ export function HowItWorksSection() {
 
       <div className="relative z-10 max-w-3xl mx-auto">
 
-        {/* Header com fade */}
         <div
           ref={headerRef}
           className="text-center mb-14"
@@ -88,16 +84,15 @@ export function HowItWorksSection() {
           }}
         >
           <h2 className="text-3xl sm:text-4xl font-extrabold text-white mb-4">
-            Organize sua mudança em poucos passos
+            {t('title')}
           </h2>
-          <p className="text-[#FA9370] text-base">Rápido, simples e sem complicação.</p>
+          <p className="text-[#FA9370] text-base">{t('subtitle')}</p>
         </div>
 
-        {/* Steps com bounce staggered 01→05 */}
         <div className="flex flex-col gap-8">
           {steps.map((step, i) => (
             <div
-              key={step.num}
+              key={i}
               data-step
               className="flex items-start gap-5"
               style={{
@@ -109,7 +104,7 @@ export function HowItWorksSection() {
               }}
             >
               <div className="flex-shrink-0 w-12 h-12 rounded-xl bg-[#E83500] text-white font-extrabold text-sm flex items-center justify-center shadow-lg shadow-[#E83500]/40">
-                {step.num}
+                {STEP_NUMS[i]}
               </div>
               <div className="pt-2">
                 <h3 className="font-bold text-white">{step.title}</h3>

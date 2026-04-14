@@ -147,6 +147,7 @@ function ItemCard({
 export function CatalogoClient({ mudancas }: CatalogoClientProps) {
   const t = useTranslations('catalog')
   const tItems = useTranslations('items')
+  const tCat = useTranslations('app.categories')
   const [busca, setBusca] = useState('')
   const [categoriaFiltro, setCategoriaFiltro] = useState<string | null>(null)
   const [loadingItem, setLoadingItem] = useState<string | null>(null)
@@ -252,7 +253,7 @@ export function CatalogoClient({ mudancas }: CatalogoClientProps) {
                   : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-50'
               )}
             >
-              {CATEGORIA_LABELS[cat]}
+              {tCat(cat as Parameters<typeof tCat>[0])}
             </button>
           ))}
         </div>

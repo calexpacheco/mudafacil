@@ -2,9 +2,11 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { useTranslations } from 'next-intl'
 
 export function NovaMudancaForm() {
   const router = useRouter()
+  const t = useTranslations('novaMudanca')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -28,7 +30,7 @@ export function NovaMudancaForm() {
 
     if (!res.ok) {
       const data = await res.json()
-      setError(data.error ?? 'Erro ao criar mudança')
+      setError(data.error ?? t('errorDefault'))
       setLoading(false)
       return
     }
@@ -41,18 +43,18 @@ export function NovaMudancaForm() {
     <form onSubmit={handleSubmit} className="flex flex-col gap-5 bg-white p-6 rounded-2xl border border-gray-200">
       <Field
         name="enderecoOrigem"
-        label="Endereço de origem"
-        placeholder="Rua, número, bairro, cidade"
+        label={t('originLabel')}
+        placeholder={t('originPlaceholder')}
         required
       />
       <Field
         name="enderecoDestino"
-        label="Endereço de destino"
-        placeholder="Rua, número, bairro, cidade"
+        label={t('destinationLabel')}
+        placeholder={t('destinationPlaceholder')}
         required
       />
       <div className="flex flex-col gap-1.5">
-        <label className="text-sm font-medium text-gray-700">Data desejada (opcional)</label>
+        <label className="text-sm font-medium text-gray-700">{t('dateLabel')}</label>
         <input
           name="dataDesejada"
           type="date"
@@ -69,7 +71,7 @@ export function NovaMudancaForm() {
         disabled={loading}
         className="py-3 rounded-xl bg-blue-600 text-white font-semibold hover:bg-blue-700 disabled:opacity-50 transition-colors"
       >
-        {loading ? 'Criando...' : 'Começar planejamento →'}
+        {loading ? t('submitting') : t('submit')}
       </button>
     </form>
   )

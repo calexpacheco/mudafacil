@@ -6,6 +6,7 @@ import { CATALOGO_ITENS, CATEGORIAS, CATEGORIA_LABELS } from '@/lib/catalogo-ite
 import { cn } from '@/design-system/utils'
 import type { ItemCatalogo } from '@/types/mudafacil'
 import { IconPackage, IconSearch, IconX, IconRuler } from '@tabler/icons-react'
+import { useTranslations } from 'next-intl'
 
 interface MudancaSimples {
   id: string
@@ -38,11 +39,12 @@ interface MudancaPickerProps {
 }
 
 function MudancaPicker({ mudancas, onSelect, onClose }: MudancaPickerProps) {
+  const t = useTranslations('catalog')
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm">
       <div className="bg-white rounded-2xl border border-gray-200 shadow-2xl w-full max-w-md mx-4 overflow-hidden">
         <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100">
-          <h3 className="font-semibold text-gray-900">Adicionar a qual mudança?</h3>
+          <h3 className="font-semibold text-gray-900">{t('addToWhichMove')}</h3>
           <button onClick={onClose} className="text-gray-400 hover:text-gray-600 p-1">
             <IconX size={16} stroke={2} />
           </button>
@@ -78,6 +80,7 @@ function ItemCard({
   onAdicionar: (item: ItemCatalogo) => void
   loading: boolean
 }) {
+  const t = useTranslations('catalog')
   const cor = CATEGORIA_COR[item.categoria] ?? { bg: 'bg-gray-400', text: 'text-white', badge: 'bg-gray-50 text-gray-600 border-gray-200' }
   const catLabel = CATEGORIA_LABELS[item.categoria] ?? item.categoria
   const inicial = item.nome.charAt(0).toUpperCase()
@@ -129,7 +132,7 @@ function ItemCard({
         disabled={loading}
         className="w-full py-2 rounded-xl bg-blue-600 text-white text-xs font-semibold hover:bg-blue-700 disabled:opacity-60 transition-colors cursor-pointer"
       >
-        {loading ? 'Adicionando...' : '+ Adicionar à mudança'}
+        {loading ? t('adding') : t('addToMove')}
       </button>
     </div>
   )
@@ -138,6 +141,7 @@ function ItemCard({
 // ─── Componente principal ─────────────────────────────────────────────────────
 
 export function CatalogoClient({ mudancas }: CatalogoClientProps) {
+  const t = useTranslations('catalog')
   const [busca, setBusca] = useState('')
   const [categoriaFiltro, setCategoriaFiltro] = useState<string | null>(null)
   const [loadingItem, setLoadingItem] = useState<string | null>(null)
@@ -158,16 +162,16 @@ export function CatalogoClient({ mudancas }: CatalogoClientProps) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ itemId }),
       })
-      if (!res.ok) throw new Error('Falha ao adicionar')
-      toast.success('Item adicionado!', {
-        description: 'Abra a mudança para visualizar no canvas.',
+      if (!res.ok) throw new Error(t('addFailed'))
+      toast.success(t('itemAdded'), {
+        description: t('itemAddedDescription'),
         action: {
-          label: 'Ver mudança',
+          label: t('viewMove'),
           onClick: () => { window.location.href = `/app/mudanca/${mudancaId}` },
         },
       })
     } catch {
-      toast.error('Erro ao adicionar item. Tente novamente.')
+      toast.error(t('addError'))
     } finally {
       setLoadingItem(null)
       setPickerItem(null)
@@ -176,10 +180,10 @@ export function CatalogoClient({ mudancas }: CatalogoClientProps) {
 
   function handleAdicionar(item: ItemCatalogo) {
     if (mudancas.length === 0) {
-      toast.error('Nenhuma mudança encontrada.', {
-        description: 'Crie uma mudança primeiro.',
+      toast.error(t('noMoveFound'), {
+        description: t('createMoveFirst'),
         action: {
-          label: 'Criar mudança',
+          label: t('createMove'),
           onClick: () => { window.location.href = '/app/nova-mudanca' },
         },
       })
@@ -211,7 +215,7 @@ export function CatalogoClient({ mudancas }: CatalogoClientProps) {
           <IconSearch size={16} stroke={1.5} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
           <input
             type="search"
-            placeholder="Buscar item..."
+            placeholder={t('searchPlaceholder')}
             value={busca}
             onChange={(e) => setBusca(e.target.value)}
             className="w-full pl-9 pr-4 py-2 text-sm bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent transition-all"
@@ -229,7 +233,7 @@ export function CatalogoClient({ mudancas }: CatalogoClientProps) {
                 : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-50'
             )}
           >
-            Todos
+            {t('all')}
           </button>
           {CATEGORIAS.map((cat) => (
             <button
@@ -250,7 +254,7 @@ export function CatalogoClient({ mudancas }: CatalogoClientProps) {
 
       {/* ─── Contador ──────────────────────────────────────────────────── */}
       <p className="text-xs text-gray-500 mb-4">
-        {itensFiltrados.length} iten{itensFiltrados.length !== 1 ? 's' : ''} encontrado{itensFiltrados.length !== 1 ? 's' : ''}
+        {t('itemsFound', { count: itensFiltrados.length })}
       </p>
 
       {/* ─── Grid ──────────────────────────────────────────────────────── */}
@@ -259,7 +263,7 @@ export function CatalogoClient({ mudancas }: CatalogoClientProps) {
           <div className="flex justify-center mb-3">
             <IconSearch size={48} stroke={1} className="text-gray-300" />
           </div>
-          <p className="text-gray-500 text-sm">Nenhum item encontrado para &quot;{busca}&quot;</p>
+          <p className="text-gray-500 text-sm">{t('noItemsFound', { query: busca })}</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">

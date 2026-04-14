@@ -5,6 +5,7 @@ import { useDroppable } from '@dnd-kit/core'
 import type { ItemPositionado } from '@/types/mudafacil'
 import { cn } from '@/design-system/utils'
 import { IconPackage, IconX, IconAlertTriangle, IconRuler } from '@tabler/icons-react'
+import { useTranslations } from 'next-intl'
 
 // ─── Mapeamentos por categoria ───────────────────────────────────────────────
 
@@ -14,14 +15,6 @@ const CATEGORIA_COR: Record<string, { bg: string; text: string }> = {
   sala:       { bg: 'bg-emerald-500', text: 'text-white' },
   escritorio: { bg: 'bg-blue-500',   text: 'text-white' },
   caixa:      { bg: 'bg-amber-400',  text: 'text-white' },
-}
-
-const CATEGORIA_LABEL: Record<string, string> = {
-  quarto:     'Quarto',
-  cozinha:    'Cozinha',
-  sala:       'Sala',
-  escritorio: 'Escritório',
-  caixa:      'Caixas',
 }
 
 function getCor(categoria: string) {
@@ -55,11 +48,13 @@ function ItemCard({
   onRemove: () => void
   onQuantidadeChange: (qty: number) => void
 }) {
+  const t = useTranslations('canvas')
+  const tCat = useTranslations('app.categories')
   const [expandido, setExpandido] = useState(false)
   const { item } = itemPos
   const qty = itemPos.quantidade ?? 1
   const cor = getCor(item.categoria)
-  const catLabel = CATEGORIA_LABEL[item.categoria] ?? item.categoria
+  const catLabel = tCat(item.categoria as Parameters<typeof tCat>[0]) ?? item.categoria
   const inicial = item.nome.charAt(0).toUpperCase()
 
   return (
@@ -101,7 +96,7 @@ function ItemCard({
           <div className="flex items-center gap-1 bg-gray-100 rounded-lg px-1 py-0.5">
             <button
               onClick={() => qty > 1 ? onQuantidadeChange(qty - 1) : onRemove()}
-              title={qty > 1 ? 'Diminuir quantidade' : 'Remover item'}
+              title={qty > 1 ? t('decreaseQty') : t('removeItem')}
               className="w-5 h-5 flex items-center justify-center rounded text-gray-500 hover:text-gray-900 hover:bg-gray-200 transition-colors text-sm font-bold"
             >
               −
@@ -111,7 +106,7 @@ function ItemCard({
             </span>
             <button
               onClick={() => onQuantidadeChange(qty + 1)}
-              title="Aumentar quantidade"
+              title={t('increaseQty')}
               className="w-5 h-5 flex items-center justify-center rounded text-gray-500 hover:text-gray-900 hover:bg-gray-200 transition-colors text-sm font-bold"
             >
               +
@@ -120,7 +115,7 @@ function ItemCard({
 
           <button
             onClick={() => setExpandido((v) => !v)}
-            title={expandido ? 'Recolher detalhes' : 'Ver dimensões'}
+            title={expandido ? t('collapseDetails') : t('viewDimensions')}
             className={cn(
               'p-1.5 rounded-lg text-xs transition-colors',
               expandido
@@ -132,7 +127,7 @@ function ItemCard({
           </button>
           <button
             onClick={onRemove}
-            title="Remover item"
+            title={t('removeItem')}
             className="p-1.5 rounded-lg text-gray-400 hover:text-red-600 hover:bg-red-50 transition-colors"
           >
             <IconX size={14} stroke={2} />
@@ -144,18 +139,18 @@ function ItemCard({
       {expandido && (
         <div className="px-4 pb-4 pt-3 border-t border-gray-100 bg-gray-50/80">
           <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-widest mb-2.5">
-            Dimensões (por unidade)
+            {t('dimensions')}
           </p>
           <div className="grid grid-cols-4 gap-2">
-            <DimBox label="Largura"   value={`${item.larguraCm} cm`} />
-            <DimBox label="Altura"    value={`${item.alturaCm} cm`} />
-            <DimBox label="Profund."  value={`${item.profundidadeCm} cm`} />
-            <DimBox label="Peso"      value={`${item.pesoKg} kg`} />
+            <DimBox label={t('width')}   value={`${item.larguraCm} cm`} />
+            <DimBox label={t('height')}  value={`${item.alturaCm} cm`} />
+            <DimBox label={t('depth')}   value={`${item.profundidadeCm} cm`} />
+            <DimBox label={t('weight')}  value={`${item.pesoKg} kg`} />
           </div>
           <div className="mt-2.5 flex items-center gap-2 text-xs text-gray-500">
             <IconRuler size={16} stroke={1.5} className="text-gray-400" />
             <span>
-              Volume unitário:{' '}
+              {t('unitVolume')}{' '}
               <span className="font-semibold text-gray-700">{item.volumeM3.toFixed(3)} m³</span>
               {qty > 1 && (
                 <span className="text-[#E83500] font-semibold ml-2">
@@ -185,6 +180,7 @@ export function ListaItensCanvas({
   onQuantidadeChange,
   limiteAtingido,
 }: ListaItensCanvasProps) {
+  const t = useTranslations('canvas')
   const { setNodeRef, isOver } = useDroppable({ id: 'canvas-area' })
 
   // ── Estado vazio: container com borda tracejada ──────────────────────────
@@ -206,9 +202,9 @@ export function ListaItensCanvas({
         </div>
         <div>
           <p className={cn('text-sm font-semibold', isOver ? 'text-blue-600' : 'text-gray-500')}>
-            {isOver ? 'Solte para adicionar!' : 'Nenhum item adicionado'}
+            {isOver ? t('dropHere') : t('emptyTitle')}
           </p>
-          <p className="text-xs text-gray-400 mt-1">Arraste itens do catálogo para cá</p>
+          <p className="text-xs text-gray-400 mt-1">{t('emptySubtitle')}</p>
         </div>
       </div>
     )
@@ -227,11 +223,11 @@ export function ListaItensCanvas({
       {/* Cabeçalho contador */}
       <div className="flex items-center justify-between mb-3">
         <p className="text-xs font-semibold text-gray-500">
-          {itens.reduce((acc, i) => acc + (i.quantidade ?? 1), 0)} iten{itens.reduce((acc, i) => acc + (i.quantidade ?? 1), 0) !== 1 ? 's' : ''} na mudança
+          {t('itemsInMove', { count: itens.reduce((acc, i) => acc + (i.quantidade ?? 1), 0) })}
         </p>
         {isOver && (
           <span className="text-xs text-blue-600 font-medium animate-pulse">
-            ＋ Solte para adicionar
+            {t('dropToAdd')}
           </span>
         )}
       </div>
@@ -248,7 +244,7 @@ export function ListaItensCanvas({
 
         {isOver && (
           <div className="rounded-xl border-2 border-dashed border-blue-400 bg-blue-50 h-16 flex items-center justify-center">
-            <span className="text-xs text-blue-500 font-medium">＋ Adicionar aqui</span>
+            <span className="text-xs text-blue-500 font-medium">{t('addHere')}</span>
           </div>
         )}
       </div>
@@ -257,9 +253,9 @@ export function ListaItensCanvas({
         <div className="mt-3 rounded-lg border border-amber-200 bg-amber-50 px-4 py-2.5 text-xs text-amber-700 flex items-center gap-2">
           <IconAlertTriangle size={16} stroke={1.5} className="text-amber-600 flex-shrink-0" />
           <span>
-            Limite atingido no plano Free.{' '}
+            {t('limitReached')}{' '}
             <a href="/app/billing" className="font-semibold underline underline-offset-2">
-              Assinar PRO
+              {t('subscribePro')}
             </a>
           </span>
         </div>

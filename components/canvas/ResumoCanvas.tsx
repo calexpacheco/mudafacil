@@ -2,6 +2,7 @@
 
 import type { CaminhaoInfo, ItemPositionado, ResumoCanvas } from '@/types/mudafacil'
 import { cn } from '@/design-system/utils'
+import { useTranslations } from 'next-intl'
 
 interface ResumoCanvasProps {
   caminhao: CaminhaoInfo
@@ -23,6 +24,7 @@ function calcularResumo(caminhao: CaminhaoInfo, itens: ItemPositionado[], quanti
 }
 
 export function ResumoCanvasPanel({ caminhao, itens, quantidadeCaminhoes = 1 }: ResumoCanvasProps) {
+  const t = useTranslations('canvas')
   const resumo = calcularResumo(caminhao, itens, quantidadeCaminhoes)
 
   const barColor =
@@ -34,19 +36,19 @@ export function ResumoCanvasPanel({ caminhao, itens, quantidadeCaminhoes = 1 }: 
 
   return (
     <aside className="flex flex-col gap-4 p-4 rounded-xl border border-gray-200 bg-white min-w-[200px]">
-      <h3 className="font-semibold text-gray-900 text-sm">Resumo da Carga</h3>
+      <h3 className="font-semibold text-gray-900 text-sm">{t('resumeTitle')}</h3>
 
       <div className="flex flex-col gap-3">
-        <StatRow label="Volume total" value={`${resumo.volumeTotal.toFixed(2)} m³`} />
-        <StatRow label="Peso estimado" value={`${resumo.pesoTotal.toFixed(0)} kg`} />
-        <StatRow label="Capacidade do caminhão" value={`${caminhao.capacidadeM3} m³`} />
-        <StatRow label="Itens no canvas" value={itens.length.toString()} />
+        <StatRow label={t('totalVolume')} value={`${resumo.volumeTotal.toFixed(2)} m³`} />
+        <StatRow label={t('estimatedWeight')} value={`${resumo.pesoTotal.toFixed(0)} kg`} />
+        <StatRow label={t('truckCapacity')} value={`${caminhao.capacidadeM3} m³`} />
+        <StatRow label={t('itemsOnCanvas')} value={itens.length.toString()} />
       </div>
 
       {/* Barra de ocupação */}
       <div className="flex flex-col gap-1.5">
         <div className="flex justify-between text-xs text-gray-500">
-          <span>Ocupação</span>
+          <span>{t('occupation')}</span>
           <span className="font-semibold text-gray-800">
             {resumo.ocupacaoPercentual.toFixed(0)}%
           </span>
@@ -61,13 +63,13 @@ export function ResumoCanvasPanel({ caminhao, itens, quantidadeCaminhoes = 1 }: 
 
       {resumo.acimaDaCapacidade && (
         <div className="rounded-lg bg-red-50 border border-red-200 p-3 text-xs text-red-700 font-medium">
-          ⚠️ Carga acima da capacidade! Considere um caminhão maior.
+          {t('overCapacity')}
         </div>
       )}
 
       {resumo.ocupacaoPercentual < 40 && itens.length > 0 && (
         <div className="rounded-lg bg-amber-50 border border-amber-200 p-3 text-xs text-amber-700">
-          💡 O caminhão está subutilizado. Você pode economizar com um modelo menor.
+          {t('underutilized')}
         </div>
       )}
     </aside>
@@ -85,6 +87,7 @@ function StatRow({ label, value }: { label: string; value: string }) {
 
 // ─── Versão horizontal compacta (para usar acima da lista) ───────────────────
 export function ResumoBar({ caminhao, itens, quantidadeCaminhoes = 1, dataDesejada, onDataChange }: ResumoCanvasProps) {
+  const t = useTranslations('canvas')
   const resumo = calcularResumo(caminhao, itens, quantidadeCaminhoes)
 
   const barColor =
@@ -102,19 +105,19 @@ export function ResumoBar({ caminhao, itens, quantidadeCaminhoes = 1, dataDeseja
 
         {/* Volume */}
         <div className="flex flex-col">
-          <span className="text-[10px] text-gray-400 uppercase tracking-wide">Volume</span>
+          <span className="text-[10px] text-gray-400 uppercase tracking-wide">{t('volume')}</span>
           <span className="text-sm font-bold text-gray-900">{resumo.volumeTotal.toFixed(2)} m³</span>
         </div>
 
         {/* Peso */}
         <div className="flex flex-col">
-          <span className="text-[10px] text-gray-400 uppercase tracking-wide">Peso</span>
+          <span className="text-[10px] text-gray-400 uppercase tracking-wide">{t('peso')}</span>
           <span className="text-sm font-bold text-gray-900">{resumo.pesoTotal.toFixed(0)} kg</span>
         </div>
 
         {/* Itens */}
         <div className="flex flex-col">
-          <span className="text-[10px] text-gray-400 uppercase tracking-wide">Itens</span>
+          <span className="text-[10px] text-gray-400 uppercase tracking-wide">{t('items')}</span>
           <span className="text-sm font-bold text-gray-900">
             {itens.reduce((acc, i) => acc + (i.quantidade ?? 1), 0)}
           </span>
@@ -123,7 +126,7 @@ export function ResumoBar({ caminhao, itens, quantidadeCaminhoes = 1, dataDeseja
         {/* Ocupação */}
         <div className="flex flex-col gap-1 sm:flex-1 sm:min-w-[120px]">
           <div className="flex justify-between items-center">
-            <span className="text-[10px] text-gray-400 uppercase tracking-wide">Ocupação</span>
+            <span className="text-[10px] text-gray-400 uppercase tracking-wide">{t('occupation')}</span>
             <span className={cn('text-xs font-bold', resumo.acimaDaCapacidade ? 'text-red-600' : 'text-gray-700')}>
               {resumo.ocupacaoPercentual.toFixed(0)}%{resumo.acimaDaCapacidade && ' ⚠️'}
             </span>
@@ -139,7 +142,7 @@ export function ResumoBar({ caminhao, itens, quantidadeCaminhoes = 1, dataDeseja
         {/* Data — inline no desktop (dentro do flex), oculta aqui no mobile */}
         {onDataChange !== undefined && (
           <div className="hidden sm:flex flex-col gap-0.5 border-l border-gray-100 pl-5">
-            <span className="text-[10px] text-gray-400 uppercase tracking-wide">Data da mudança</span>
+            <span className="text-[10px] text-gray-400 uppercase tracking-wide">{t('moveDate')}</span>
             <input
               type="date"
               value={dataDesejada ?? ''}
@@ -155,7 +158,7 @@ export function ResumoBar({ caminhao, itens, quantidadeCaminhoes = 1, dataDeseja
       {/* Data — só no mobile, abaixo do grid com divisor */}
       {onDataChange !== undefined && (
         <div className="sm:hidden mt-3 pt-3 border-t border-gray-100 flex flex-col gap-0.5">
-          <span className="text-[10px] text-gray-400 uppercase tracking-wide">Data da mudança</span>
+          <span className="text-[10px] text-gray-400 uppercase tracking-wide">{t('moveDate')}</span>
           <input
             type="date"
             value={dataDesejada ?? ''}
@@ -167,7 +170,7 @@ export function ResumoBar({ caminhao, itens, quantidadeCaminhoes = 1, dataDeseja
       )}
 
       {resumo.acimaDaCapacidade && (
-        <p className="mt-2 text-xs text-red-600 font-medium">⚠️ Acima da capacidade! Considere um veículo maior.</p>
+        <p className="mt-2 text-xs text-red-600 font-medium">{t('overCapacityBar')}</p>
       )}
     </div>
   )

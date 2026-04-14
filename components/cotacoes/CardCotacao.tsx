@@ -3,6 +3,7 @@
 import type { CotacaoCard } from '@/types/mudafacil'
 import { cn } from '@/design-system/utils'
 import { IconTruck, IconShield, IconTruckDelivery, IconCalendar, IconCheck, IconAlertTriangle, IconStar } from '@tabler/icons-react'
+import { useTranslations } from 'next-intl'
 
 function Estrelas({ nota }: { nota: number }) {
   return (
@@ -42,6 +43,7 @@ export function CardCotacao({
   contratada = false,
   contratarStatus = 'idle',
 }: CardCotacaoProps) {
+  const t = useTranslations('cotacoes')
   const isLoading = contratarStatus === 'loading'
   const isSuccess = contratada || contratarStatus === 'success'
   const isError = contratarStatus === 'error'
@@ -62,15 +64,15 @@ export function CardCotacao({
           <p className="font-semibold text-gray-900 text-sm truncate">{cotacao.transportadora.nome}</p>
           <Estrelas nota={cotacao.transportadora.notaMedia} />
           <p className="text-xs text-gray-400 mt-0.5">
-            {cotacao.transportadora.totalAvaliacoes} avaliações · {cotacao.transportadora.cidade}
+            {t('reviews', { count: cotacao.transportadora.totalAvaliacoes })} · {cotacao.transportadora.cidade}
           </p>
         </div>
         <div className="text-right flex-shrink-0">
           <p className="text-xl font-bold text-gray-900">{formatCurrency(cotacao.precoCentavos)}</p>
-          <p className="text-xs text-gray-400">por mudança</p>
+          <p className="text-xs text-gray-400">{t('perMove')}</p>
           {cotacao.seguroIncluso && (
             <span className="inline-flex items-center gap-1 text-[10px] font-medium text-green-700 mt-1">
-              <IconShield size={12} stroke={1.5} className="text-green-700" /> Seguro incluso
+              <IconShield size={12} stroke={1.5} className="text-green-700" /> {t('insuranceIncluded')}
             </span>
           )}
         </div>
@@ -79,21 +81,21 @@ export function CardCotacao({
       {/* Detalhes — apenas badges de largura previsível, sem seguro */}
       <div className="flex flex-wrap gap-1.5">
         <Badge icon={<IconTruckDelivery size={12} stroke={1.5} />} label={cotacao.caminhao.nome} />
-        <Badge icon={<IconCalendar size={12} stroke={1.5} />} label={`Disponível ${formatDate(cotacao.dataDisponivel)}`} />
-        <Badge icon={<IconCalendar size={12} stroke={1.5} />} label={`Válido até ${formatDate(cotacao.validade)}`} className="bg-gray-50" />
+        <Badge icon={<IconCalendar size={12} stroke={1.5} />} label={t('availableOn', { date: formatDate(cotacao.dataDisponivel) })} />
+        <Badge icon={<IconCalendar size={12} stroke={1.5} />} label={t('validUntil', { date: formatDate(cotacao.validade) })} className="bg-gray-50" />
       </div>
 
       {/* CTA */}
       {isSuccess ? (
         <div className="w-full py-1.5 rounded-lg bg-green-50 border border-green-200 text-green-700 text-xs font-semibold text-center flex items-center justify-center gap-1.5">
-          <IconCheck size={14} stroke={2} className="text-green-700" /> Cotação contratada
+          <IconCheck size={14} stroke={2} className="text-green-700" /> {t('contracted')}
         </div>
       ) : isError ? (
         <button
           onClick={() => onContratar(cotacao)}
           className="w-full py-1.5 rounded-lg bg-red-50 border border-red-200 text-red-700 text-xs font-semibold hover:bg-red-100 cursor-pointer transition-colors flex items-center justify-center gap-1.5"
         >
-          <IconAlertTriangle size={14} stroke={1.5} className="text-red-700" /> Tentar novamente
+          <IconAlertTriangle size={14} stroke={1.5} className="text-red-700" /> {t('tryAgain')}
         </button>
       ) : (
         <button
@@ -104,10 +106,10 @@ export function CardCotacao({
           {isLoading ? (
             <>
               <span className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin" />
-              Contratando...
+              {t('contracting')}
             </>
           ) : (
-            'Contratar'
+            t('hire')
           )}
         </button>
       )}

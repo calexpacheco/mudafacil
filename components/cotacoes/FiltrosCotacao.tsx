@@ -3,6 +3,7 @@
 import type { FiltrosCotacao } from '@/types/mudafacil'
 import { cn } from '@/design-system/utils'
 import { IconCurrencyDollar, IconStar, IconCalendar, IconLock } from '@tabler/icons-react'
+import { useTranslations } from 'next-intl'
 
 interface FiltrosCotacaoProps {
   filtros: FiltrosCotacao
@@ -11,17 +12,18 @@ interface FiltrosCotacaoProps {
 }
 
 export function FiltrosCotacaoPainel({ filtros, onChange, filtrosAvancados }: FiltrosCotacaoProps) {
+  const t = useTranslations('cotacoes')
   function update(partial: Partial<FiltrosCotacao>) {
     onChange({ ...filtros, ...partial })
   }
 
   return (
     <div className="flex flex-col gap-4 p-4 rounded-xl border border-gray-200 bg-white">
-      <h3 className="font-semibold text-gray-900 text-sm">Filtrar Cotações</h3>
+      <h3 className="font-semibold text-gray-900 text-sm">{t('filterTitle')}</h3>
 
       {/* Ordenação — disponível para todos */}
       <div>
-        <label className="text-xs text-gray-500 font-medium mb-1 block">Ordenar por</label>
+        <label className="text-xs text-gray-500 font-medium mb-1 block">{t('sortBy')}</label>
         <div className="flex flex-wrap gap-2">
           {(['preco', 'nota', 'data'] as const).map((op) => (
             <button
@@ -35,10 +37,10 @@ export function FiltrosCotacaoPainel({ filtros, onChange, filtrosAvancados }: Fi
               )}
             >
               {op === 'preco'
-                ? <span className="flex items-center gap-1"><IconCurrencyDollar size={12} stroke={1.5} /> Menor preço</span>
+                ? <span className="flex items-center gap-1"><IconCurrencyDollar size={12} stroke={1.5} /> {t('lowestPrice')}</span>
                 : op === 'nota'
-                  ? <span className="flex items-center gap-1"><IconStar size={12} stroke={1.5} /> Melhor nota</span>
-                  : <span className="flex items-center gap-1"><IconCalendar size={12} stroke={1.5} /> Disponível</span>}
+                  ? <span className="flex items-center gap-1"><IconStar size={12} stroke={1.5} /> {t('bestRating')}</span>
+                  : <span className="flex items-center gap-1"><IconCalendar size={12} stroke={1.5} /> {t('available')}</span>}
             </button>
           ))}
         </div>
@@ -47,7 +49,7 @@ export function FiltrosCotacaoPainel({ filtros, onChange, filtrosAvancados }: Fi
       {!filtrosAvancados && (
         <div className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-xs text-amber-700 flex items-center gap-1.5">
           <IconLock size={14} stroke={1.5} className="text-amber-700 flex-shrink-0" />
-          Filtros avançados disponíveis no Trial ou PRO
+          {t('advancedFiltersLocked')}
         </div>
       )}
 
@@ -56,7 +58,7 @@ export function FiltrosCotacaoPainel({ filtros, onChange, filtrosAvancados }: Fi
           {/* Preço máximo */}
           <div>
             <label className="text-xs text-gray-500 font-medium mb-1 block">
-              Preço máximo: {filtros.precoMax ? `R$ ${filtros.precoMax}` : 'Sem limite'}
+              {filtros.precoMax ? t('maxPrice', { price: `R$ ${filtros.precoMax}` }) : t('maxPriceNoLimit')}
             </label>
             <input
               type="range"
@@ -73,7 +75,7 @@ export function FiltrosCotacaoPainel({ filtros, onChange, filtrosAvancados }: Fi
           {/* Nota mínima */}
           <div>
             <label className="text-xs text-gray-500 font-medium mb-1 block">
-              Nota mínima: {filtros.notaMin ?? 0}★
+              {t('minRating', { rating: filtros.notaMin ?? 0 })}
             </label>
             <input
               type="range"

@@ -16,6 +16,7 @@ import { toast } from 'sonner'
 import { NovaMudancaModal } from '@/components/ui/NovaMudancaModal'
 import { useRouter } from 'next/navigation'
 import { createPortal } from 'react-dom'
+import { useTranslations } from 'next-intl'
 
 // ─── Preço dinâmico das cotações ─────────────────────────────────────────────
 // Ajusta o preço base de cada cotação conforme volume atual, nº de caminhões e urgência.
@@ -61,13 +62,10 @@ const CATEGORIA_COR: Record<string, string> = {
   caixa:      'bg-amber-400',
 }
 
-const CATEGORIA_LABEL: Record<string, string> = {
-  quarto: 'Quarto', cozinha: 'Cozinha', sala: 'Sala', escritorio: 'Escritório', caixa: 'Caixas',
-}
-
 function DragPreviewCard({ item }: { item: ItemCatalogo }) {
+  const t = useTranslations('app.categories')
   const cor = CATEGORIA_COR[item.categoria] ?? 'bg-gray-400'
-  const cat = CATEGORIA_LABEL[item.categoria] ?? item.categoria
+  const cat = t(item.categoria as Parameters<typeof t>[0]) ?? item.categoria
   return (
     <div className="flex items-center gap-3 px-4 py-3 bg-white rounded-xl border-2 border-blue-400 shadow-2xl w-72 cursor-grabbing rotate-2 opacity-95">
       <div className={`w-9 h-9 rounded-full flex-shrink-0 flex items-center justify-center font-bold text-sm text-white ${cor}`}>
@@ -101,6 +99,7 @@ const VEICULO_TAMANHO: Record<string, number> = {
 }
 
 function EmpresaContratadaBanner({ info, onAceitarPreco }: { info: CotacaoContratadaInfo; onAceitarPreco?: (novoPreco: number) => void }) {
+  const t = useTranslations('canvasEditor')
   const fmt = (c: number) =>
     new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(c / 100)
 
@@ -125,7 +124,7 @@ function EmpresaContratadaBanner({ info, onAceitarPreco }: { info: CotacaoContra
           {info.nomeTransportadora.charAt(0).toUpperCase()}
         </div>
         <div>
-          <p className="text-[10px] font-semibold text-green-700 uppercase tracking-wide">Empresa contratada</p>
+          <p className="text-[10px] font-semibold text-green-700 uppercase tracking-wide">{t('contractedCompany')}</p>
           <p className="text-sm font-bold text-gray-900 leading-tight">{info.nomeTransportadora}</p>
         </div>
       </div>
@@ -134,24 +133,24 @@ function EmpresaContratadaBanner({ info, onAceitarPreco }: { info: CotacaoContra
 
       {/* Valor */}
       <div className="flex flex-col">
-        <span className="text-[10px] font-semibold text-green-700 uppercase tracking-wide">Valor contratado</span>
+        <span className="text-[10px] font-semibold text-green-700 uppercase tracking-wide">{t('contractedValue')}</span>
         <span className="text-lg font-bold text-green-700 leading-tight">{fmt(info.precoCentavos)}</span>
         {info.seguroIncluso && (
           <span className="text-[10px] text-green-600 flex items-center gap-0.5">
-            <IconCheck size={10} stroke={2} className="text-green-600" /> Seguro incluso
+            <IconCheck size={10} stroke={2} className="text-green-600" /> {t('insuranceIncluded')}
           </span>
         )}
         {condicoesAlteradas && precoAtual !== undefined && (
           <span className={`text-[10px] font-semibold flex items-center gap-1 mt-0.5 ${diff > 0 ? 'text-amber-600' : 'text-blue-600'}`}>
             <IconAlertTriangle size={10} stroke={2} />
-            Estimativa atual: {fmt(precoAtual)} ({diff > 0 ? '+' : ''}{diffPct}%)
+            {t('currentEstimate', { price: fmt(precoAtual), diff: `${diff > 0 ? '+' : ''}${diffPct}` })}
             {onAceitarPreco && (
               <button
                 onClick={() => onAceitarPreco(precoAtual)}
-                title="Aceitar novo preço estimado"
+                title={t('acceptPriceTitle')}
                 className="ml-1 flex items-center gap-0.5 px-1.5 py-0.5 rounded-md bg-green-100 hover:bg-green-200 text-green-700 text-[10px] font-bold transition-colors cursor-pointer border border-green-300"
               >
-                <IconCheck size={10} stroke={2.5} /> Aceitar
+                <IconCheck size={10} stroke={2.5} /> {t('acceptPrice')}
               </button>
             )}
           </span>
@@ -162,7 +161,7 @@ function EmpresaContratadaBanner({ info, onAceitarPreco }: { info: CotacaoContra
 
       {/* Data */}
       <div className="flex flex-col">
-        <span className="text-[10px] font-semibold text-green-700 uppercase tracking-wide">Data prevista</span>
+        <span className="text-[10px] font-semibold text-green-700 uppercase tracking-wide">{t('scheduledDate')}</span>
         <span className="text-sm font-semibold text-gray-800 leading-tight capitalize">
           {dataFmt ?? '—'}
         </span>
@@ -174,7 +173,7 @@ function EmpresaContratadaBanner({ info, onAceitarPreco }: { info: CotacaoContra
       <div className="flex items-center gap-2">
         <IconTruck size={veiculoTamanho} stroke={1.5} className="text-green-700" />
         <div className="flex flex-col">
-          <span className="text-[10px] font-semibold text-green-700 uppercase tracking-wide">Veículo</span>
+          <span className="text-[10px] font-semibold text-green-700 uppercase tracking-wide">{t('vehicle')}</span>
           <span className="text-sm font-semibold text-gray-800 leading-tight">
             {info.nomeVeiculo ?? '—'}
           </span>
@@ -357,6 +356,7 @@ interface CanvasEditorProps {
 
 
 export function CanvasEditor({ mudancaId, caminhaoInicial, layoutInicial, plan, filtrosAvancados, dataDesejadaInicial = null, cotacaoContratadaInicial = null }: CanvasEditorProps) {
+  const t = useTranslations('canvasEditor')
   const [tab, setTab] = useState<TabType>('canvas')
   const [caminhao, setCaminhao] = useState<CaminhaoInfo>(caminhaoInicial)
   const [filtros, setFiltros] = useState<FiltrosCotacao>({ ordenarPor: 'preco' })
@@ -519,7 +519,7 @@ export function CanvasEditor({ mudancaId, caminhaoInicial, layoutInicial, plan, 
   // Adiciona item direto (mobile tap ou qualquer clique no +)
   const handleAddItemDirect = useCallback((itemCatalogo: ItemCatalogo) => {
     if (limiteAtingido) {
-      toast.error('Limite de itens atingido. Faça upgrade para adicionar mais.')
+      toast.error(t('limitReached'))
       return
     }
     const novoItem: ItemPositionado = {
@@ -539,7 +539,7 @@ export function CanvasEditor({ mudancaId, caminhaoInicial, layoutInicial, plan, 
       saveLayout(next, novoCaminhao, novaQtd)
       return next
     })
-    toast.success(`${itemCatalogo.nome} adicionado`, { duration: 1500 })
+    toast.success(t('itemAdded', { name: itemCatalogo.nome }), { duration: 1500 })
   }, [itens, limiteAtingido, autoSelecionarVeiculo, saveLayout])
 
   const handleDragEnd = useCallback((event: DragEndEvent) => {
@@ -685,17 +685,17 @@ export function CanvasEditor({ mudancaId, caminhaoInicial, layoutInicial, plan, 
 
         {/* Tabs — ocupam toda a largura no mobile */}
         <div className="flex flex-1 gap-1 p-1 bg-gray-100 rounded-xl">
-          {(['canvas', 'cotacoes'] as const).map((t) => (
+          {(['canvas', 'cotacoes'] as const).map((tabKey) => (
             <button
-              key={t}
-              onClick={() => { setTab(t); closePanel() }}
+              key={tabKey}
+              onClick={() => { setTab(tabKey); closePanel() }}
               className={`flex-1 lg:flex-none flex items-center justify-center gap-1.5 px-3 lg:px-4 py-2 rounded-lg text-sm font-medium transition-colors cursor-pointer ${
-                tab === t ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-700'
+                tab === tabKey ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-700'
               }`}
             >
-              {t === 'canvas'
-                ? <><IconPackage size={16} stroke={1.5} /><span className="hidden sm:inline">Canvas de Carga</span><span className="sm:hidden">Canvas</span></>
-                : <><IconSearch size={16} stroke={1.5} /><span>Cotações</span></>}
+              {tabKey === 'canvas'
+                ? <><IconPackage size={16} stroke={1.5} /><span className="hidden sm:inline">{t('tabCanvas')}</span><span className="sm:hidden">{t('tabCanvasMobile')}</span></>
+                : <><IconSearch size={16} stroke={1.5} /><span>{t('tabCotacoes')}</span></>}
             </button>
           ))}
         </div>
@@ -704,7 +704,7 @@ export function CanvasEditor({ mudancaId, caminhaoInicial, layoutInicial, plan, 
         <button
           onClick={() => panelOpen ? closePanel() : openPanel()}
           className="lg:hidden flex items-center gap-1 px-3 py-2 rounded-xl bg-white border border-gray-200 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors cursor-pointer"
-          title={tab === 'canvas' ? 'Catálogo' : 'Filtros'}
+          title={tab === 'canvas' ? t('catalog') : t('filters')}
         >
           {tab === 'canvas'
             ? <IconBooks size={16} stroke={1.5} />
@@ -717,9 +717,9 @@ export function CanvasEditor({ mudancaId, caminhaoInicial, layoutInicial, plan, 
 
         {/* Status de save — só desktop */}
         <span className="hidden lg:flex text-xs text-gray-400 items-center gap-1 flex-shrink-0">
-          {saveStatus === 'saving' && 'Salvando...'}
-          {saveStatus === 'saved' && <><IconCheck size={14} stroke={2} className="text-green-500" /> Salvo</>}
-          {saveStatus === 'unsaved' && '○ Não salvo'}
+          {saveStatus === 'saving' && t('saving')}
+          {saveStatus === 'saved' && <><IconCheck size={14} stroke={2} className="text-green-500" /> {t('saved')}</>}
+          {saveStatus === 'unsaved' && t('unsaved')}
         </span>
       </div>
 
@@ -737,7 +737,7 @@ export function CanvasEditor({ mudancaId, caminhaoInicial, layoutInicial, plan, 
             {tab === 'canvas' ? (
               <div className="bg-white rounded-xl border border-gray-200 p-4 lg:sticky lg:top-4">
                 <h2 className="text-sm font-semibold text-gray-900 mb-3 flex items-center gap-1.5">
-                  <IconBooks size={16} stroke={1.5} className="text-gray-700" /> Catálogo
+                  <IconBooks size={16} stroke={1.5} className="text-gray-700" /> {t('catalogTitle')}
                 </h2>
                 <CatalogoPainel onAdd={handleAddItemDirect} />
               </div>
@@ -772,8 +772,8 @@ export function CanvasEditor({ mudancaId, caminhaoInicial, layoutInicial, plan, 
                 <div className="flex items-center justify-between px-4 pt-2 pb-3 flex-shrink-0 border-b border-gray-100">
                   <h2 className="text-base font-bold text-gray-900 flex items-center gap-2">
                     {tab === 'canvas'
-                      ? <><IconBooks size={18} stroke={1.5} className="text-gray-700" /> Catálogo de itens</>
-                      : <><IconAdjustments size={18} stroke={1.5} className="text-gray-700" /> Filtros</>}
+                      ? <><IconBooks size={18} stroke={1.5} className="text-gray-700" /> {t('catalogItemsTitle')}</>
+                      : <><IconAdjustments size={18} stroke={1.5} className="text-gray-700" /> {t('filters')}</>}
                   </h2>
                   <button
                     onClick={closePanel}
@@ -809,7 +809,7 @@ export function CanvasEditor({ mudancaId, caminhaoInicial, layoutInicial, plan, 
                     info={cotacaoContratadaComPrecoAtual}
                     onAceitarPreco={(novoPreco) => {
                       setCotacaoInfo((prev) => prev ? { ...prev, precoCentavos: novoPreco } : prev)
-                      toast.success('Preço atualizado com sucesso')
+                      toast.success(t('priceUpdated'))
                     }}
                   />
                 )}
@@ -822,7 +822,7 @@ export function CanvasEditor({ mudancaId, caminhaoInicial, layoutInicial, plan, 
                 />
                 <div className="bg-white rounded-xl border border-gray-200 p-4">
                   <h2 className="text-sm font-semibold text-gray-700 mb-3 flex items-center gap-1.5">
-                    <IconTruck size={16} stroke={1.5} className="text-gray-700" /> Selecionar Veículo
+                    <IconTruck size={16} stroke={1.5} className="text-gray-700" /> {t('selectVehicle')}
                   </h2>
                   <SeletorCaminhao
                     selecionado={caminhao}
@@ -841,9 +841,9 @@ export function CanvasEditor({ mudancaId, caminhaoInicial, layoutInicial, plan, 
                 />
                 {/* Status de save — só mobile, abaixo do conteúdo */}
                 <div className="lg:hidden text-xs text-gray-400 flex items-center gap-1 justify-end pb-20">
-                  {saveStatus === 'saving' && 'Salvando...'}
-                  {saveStatus === 'saved' && <><IconCheck size={13} stroke={2} className="text-green-500" /> Salvo</>}
-                  {saveStatus === 'unsaved' && '○ Não salvo'}
+                  {saveStatus === 'saving' && t('saving')}
+                  {saveStatus === 'saved' && <><IconCheck size={13} stroke={2} className="text-green-500" /> {t('saved')}</>}
+                  {saveStatus === 'unsaved' && t('unsaved')}
                 </div>
               </div>
             )}
@@ -853,7 +853,7 @@ export function CanvasEditor({ mudancaId, caminhaoInicial, layoutInicial, plan, 
                 {cotacoesFiltradas.length === 0 ? (
                   <div className="text-center py-12 text-gray-400 flex flex-col items-center gap-2">
                     <IconSearch size={32} stroke={1} className="text-gray-300" />
-                    <p className="text-sm">Nenhuma cotação encontrada com esses filtros</p>
+                    <p className="text-sm">{t('noQuotesFound')}</p>
                   </div>
                 ) : (
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -872,14 +872,14 @@ export function CanvasEditor({ mudancaId, caminhaoInicial, layoutInicial, plan, 
                 {plan === 'FREE' && COTACOES_MOCK.length > 3 && (
                   <div className="rounded-xl border border-dashed border-[#FA9370] bg-[#FFF8F6] p-6 text-center mb-20 lg:mb-0">
                     <p className="text-sm font-semibold text-gray-700 mb-1">
-                      +{COTACOES_MOCK.length - 3} cotações disponíveis
+                      {t('moreQuotes', { count: COTACOES_MOCK.length - 3 })}
                     </p>
-                    <p className="text-xs text-gray-500 mb-3">Assine PRO para ver todas as cotações</p>
+                    <p className="text-xs text-gray-500 mb-3">{t('upgradeToPro')}</p>
                     <a
                       href="/app/billing"
                       className="text-sm px-4 py-2 rounded-lg bg-[#E83500] text-white font-semibold hover:bg-[#C42A08] transition-colors"
                     >
-                      Assinar PRO
+                      {t('subscribePro')}
                     </a>
                   </div>
                 )}
@@ -911,7 +911,7 @@ export function CanvasEditor({ mudancaId, caminhaoInicial, layoutInicial, plan, 
 
           {/* 1. Nova Mudança */}
           <SpeedDialAction
-            label="Nova Mudança"
+            label={t('fabNewMove')}
             icon={<IconPlus size={18} stroke={2} />}
             open={fabOpen}
             delay={120}
@@ -921,7 +921,7 @@ export function CanvasEditor({ mudancaId, caminhaoInicial, layoutInicial, plan, 
 
           {/* 2. Adicionar itens */}
           <SpeedDialAction
-            label="Adicionar itens"
+            label={t('fabAddItems')}
             icon={<IconBooks size={18} stroke={1.5} />}
             open={fabOpen}
             delay={60}
@@ -931,7 +931,7 @@ export function CanvasEditor({ mudancaId, caminhaoInicial, layoutInicial, plan, 
 
           {/* 3. Excluir mudança */}
           <SpeedDialAction
-            label="Excluir mudança"
+            label={t('fabDelete')}
             icon={<IconTrash size={18} stroke={1.5} />}
             open={fabOpen}
             delay={0}
@@ -966,8 +966,8 @@ export function CanvasEditor({ mudancaId, caminhaoInicial, layoutInicial, plan, 
                 <IconTrash size={20} stroke={2} className="text-red-600" />
               </div>
               <div>
-                <h3 className="text-base font-bold text-gray-900">Excluir mudança?</h3>
-                <p className="text-sm text-gray-500 mt-1">Esta ação não pode ser desfeita. Todos os itens, layout e cotações serão removidos permanentemente.</p>
+                <h3 className="text-base font-bold text-gray-900">{t('deleteTitle')}</h3>
+                <p className="text-sm text-gray-500 mt-1">{t('deleteDescription')}</p>
               </div>
             </div>
             <div className="flex gap-3">
@@ -976,7 +976,7 @@ export function CanvasEditor({ mudancaId, caminhaoInicial, layoutInicial, plan, 
                 disabled={deleting}
                 className="flex-1 py-2.5 rounded-xl border border-gray-200 text-gray-700 text-sm font-semibold hover:bg-gray-50 transition-colors cursor-pointer disabled:opacity-50"
               >
-                Cancelar
+                {t('deleteCancel')}
               </button>
               <button
                 onClick={handleDeleteConfirm}
@@ -985,7 +985,7 @@ export function CanvasEditor({ mudancaId, caminhaoInicial, layoutInicial, plan, 
               >
                 {deleting
                   ? <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                  : <><IconTrash size={14} stroke={2} /> Excluir</>}
+                  : <><IconTrash size={14} stroke={2} /> {t('deleteConfirm')}</>}
               </button>
             </div>
           </div>

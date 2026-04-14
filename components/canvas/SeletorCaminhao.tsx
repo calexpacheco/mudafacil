@@ -5,6 +5,7 @@ import { CAMINHOES, CAMINHAO_CORES } from '@/lib/caminhoes'
 import type { CaminhaoInfo, ItemPositionado } from '@/types/mudafacil'
 import { cn } from '@/design-system/utils'
 import { IconTruck, IconCheck, IconAlertTriangle } from '@tabler/icons-react'
+import { useTranslations } from 'next-intl'
 
 interface SeletorCaminhaoProps {
   selecionado: CaminhaoInfo
@@ -121,9 +122,7 @@ export function SeletorCaminhao({
                     <TruckIcon tipo={caminhao.tipo} cor={cor} />
                   </button>
                   {isSelected && (
-                    <span className="text-[10px] font-bold text-[#E83500] flex items-center gap-0.5">
-                      <IconCheck size={12} stroke={2} /> Selecionado
-                    </span>
+                    <SelectedBadge />
                   )}
                 </div>
 
@@ -199,6 +198,23 @@ export function SeletorCaminhao({
   )
 }
 
+// ── Badge "Selecionado" ─────────────────────────────────────────────────────
+function SelectedBadge({ large }: { large?: boolean }) {
+  const t = useTranslations('canvas')
+  if (large) {
+    return (
+      <span className="text-xs font-bold text-[#E83500] flex items-center gap-1 bg-[#FFE8E0] px-2 py-1 rounded-full">
+        <IconCheck size={12} stroke={2.5} /> {t('selected')}
+      </span>
+    )
+  }
+  return (
+    <span className="text-[10px] font-bold text-[#E83500] flex items-center gap-0.5">
+      <IconCheck size={12} stroke={2} /> {t('selected')}
+    </span>
+  )
+}
+
 // ── Card do carrossel mobile ────────────────────────────────────────────────
 
 function CarouselCard({
@@ -247,11 +263,7 @@ function CarouselCard({
         >
           <TruckIcon tipo={caminhao.tipo} cor={cor} large />
         </div>
-        {isSelected && (
-          <span className="text-xs font-bold text-[#E83500] flex items-center gap-1 bg-[#FFE8E0] px-2 py-1 rounded-full">
-            <IconCheck size={12} stroke={2.5} /> Selecionado
-          </span>
-        )}
+        {isSelected && <SelectedBadge large />}
       </div>
 
       {/* Nome e capacidade */}
@@ -267,12 +279,13 @@ function CarouselCard({
       {/* Barra de ocupação */}
       <div>
         <div className="flex justify-between text-xs text-gray-400 mb-1">
-          <span>Ocupação</span>
+          <OcupacaoLabel />
           <span className={acima ? 'text-red-500 font-bold' : 'font-semibold text-gray-600'}>
             {ocupacao.toFixed(0)}%
             {acima && <IconAlertTriangle size={12} stroke={2} className="inline ml-0.5 text-red-500" />}
           </span>
         </div>
+
         <div className="w-full h-2 rounded-full bg-gray-100 overflow-hidden">
           <div
             className={cn('h-full rounded-full transition-all duration-500',
@@ -289,7 +302,7 @@ function CarouselCard({
           className="flex items-center justify-between pt-3 border-t border-[#FA9370]/30"
           onClick={(e) => e.stopPropagation()}
         >
-          <span className="text-sm text-gray-600 font-medium">Quantidade</span>
+          <QuantidadeLabel />
           <QuantidadeControl quantidade={quantidadeCaminhoes} onChange={onQuantidadeCaminhoesChange} />
         </div>
       )}
@@ -299,11 +312,21 @@ function CarouselCard({
 
 // ── Sub-componentes reutilizáveis ──────────────────────────────────────────
 
+function OcupacaoLabel() {
+  const t = useTranslations('canvas')
+  return <span>{t('occupation')}</span>
+}
+
+function QuantidadeLabel() {
+  const t = useTranslations('canvas')
+  return <span className="text-sm text-gray-600 font-medium">{t('quantity')}</span>
+}
+
 function OcupacaoBar({ ocupacao, acima }: { ocupacao: number; acima: boolean }) {
   return (
     <div>
       <div className="flex justify-between text-[10px] text-gray-400 mb-0.5">
-        <span>Ocupação</span>
+        <OcupacaoLabel />
         <span className={cn('flex items-center gap-0.5', acima ? 'text-red-500 font-bold' : '')}>
           {ocupacao.toFixed(0)}%
           {acima && <IconAlertTriangle size={10} stroke={2} />}

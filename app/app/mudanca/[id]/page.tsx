@@ -6,6 +6,7 @@ import { TrialBanner } from '@/components/paywall/PaywallGate'
 import { EnderecoEditor } from '@/components/mudanca/EnderecoEditor'
 import { BotaoDeletarMudanca } from '@/components/dashboard/BotaoDeletarMudanca'
 import { CAMINHOES } from '@/lib/caminhoes'
+import { getTranslations } from 'next-intl/server'
 
 interface Props {
   params: Promise<{ id: string }>
@@ -13,6 +14,7 @@ interface Props {
 
 export default async function MudancaPage({ params }: Props) {
   const { id } = await params
+  const t = await getTranslations('mudancaPage')
   const session = await auth()
   if (!session?.user?.id) redirect('/login')
 
@@ -51,7 +53,7 @@ export default async function MudancaPage({ params }: Props) {
             />
             <BotaoDeletarMudanca mudancaId={mudanca.id} variant="full" />
           </div>
-          <p className="text-gray-500 text-sm mt-2">Monte visualmente sua carga</p>
+          <p className="text-gray-500 text-sm mt-2">{t('subtitle')}</p>
         </div>
 
         <CanvasEditor

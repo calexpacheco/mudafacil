@@ -3,6 +3,7 @@
 import { useState, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { IconAlertTriangle, IconCheck, IconPencil } from '@tabler/icons-react'
+import { useTranslations } from 'next-intl'
 
 interface EnderecoEditorProps {
   mudancaId: string
@@ -17,6 +18,7 @@ export function EnderecoEditor({
   enderecoOrigem,
   enderecoDestino,
 }: EnderecoEditorProps) {
+  const t = useTranslations('endereco')
   const router = useRouter()
   const [editando, setEditando] = useState(false)
   const [origem, setOrigem] = useState(enderecoOrigem)
@@ -88,7 +90,7 @@ export function EnderecoEditor({
       <form onSubmit={salvar} className="flex flex-col gap-2">
         <p className="text-xs text-amber-600 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2 flex items-center gap-1.5">
           <IconAlertTriangle size={14} stroke={1.5} className="text-amber-600 flex-shrink-0" />
-          Alterar os endereços vai <strong>resetar as cotações</strong> desta mudança.
+          {t('warningReset')}
         </p>
 
         {/* Endereço A */}
@@ -100,7 +102,7 @@ export function EnderecoEditor({
             ref={origemRef}
             value={origem}
             onChange={(e) => setOrigem(e.target.value)}
-            placeholder="Endereço de origem"
+            placeholder={t('originPlaceholder')}
             required
             className="flex-1 text-sm border border-gray-300 rounded-lg px-3 py-1.5 outline-none focus:ring-2 focus:ring-blue-300 focus:border-blue-400"
           />
@@ -119,7 +121,7 @@ export function EnderecoEditor({
           <input
             value={destino}
             onChange={(e) => setDestino(e.target.value)}
-            placeholder="Endereço de destino"
+            placeholder={t('destinationPlaceholder')}
             required
             className="flex-1 text-sm border border-gray-300 rounded-lg px-3 py-1.5 outline-none focus:ring-2 focus:ring-blue-300 focus:border-blue-400"
           />
@@ -135,10 +137,10 @@ export function EnderecoEditor({
             {saveState === 'saving' ? (
               <>
                 <span className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                Salvando...
+                {t('saving')}
               </>
             ) : (
-              'Salvar endereços'
+              t('saveAddresses')
             )}
           </button>
           <button
@@ -146,12 +148,12 @@ export function EnderecoEditor({
             onClick={cancelar}
             className="px-3 py-1.5 rounded-lg text-gray-500 text-sm hover:text-gray-700 hover:bg-gray-100 transition-colors"
           >
-            Cancelar
+            {t('cancel')}
           </button>
           {saveState === 'error' && (
             <span className="text-xs text-red-600 flex items-center gap-1">
               <IconAlertTriangle size={12} stroke={2} className="text-red-600" />
-              Erro ao salvar. Tente novamente.
+              {t('saveError')}
             </span>
           )}
         </div>
@@ -164,7 +166,7 @@ export function EnderecoEditor({
       {cotacoesResetadas && (
         <p className="text-xs text-blue-600 bg-blue-50 border border-blue-200 rounded-lg px-3 py-2 mb-1 flex items-center gap-1.5">
           <IconCheck size={14} stroke={2} className="text-blue-600 flex-shrink-0" />
-          Endereços atualizados. Cotações resetadas — solicite novas cotações.
+          {t('updatedMessage')}
         </p>
       )}
 
@@ -197,7 +199,7 @@ export function EnderecoEditor({
         {/* Botão de editar */}
         <button
           onClick={abrirEdicao}
-          title="Editar endereços"
+          title={t('editTitle')}
           className="opacity-0 group-hover:opacity-100 mt-0.5 p-1.5 rounded-lg text-gray-400 hover:text-blue-600 hover:bg-blue-50 transition-all flex-shrink-0"
         >
           <IconPencil size={16} stroke={1.5} />

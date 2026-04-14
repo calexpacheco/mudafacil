@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { useDraggable } from '@dnd-kit/core'
+import { useTranslations } from 'next-intl'
 import { CATALOGO_ITENS, CATEGORIAS, CATEGORIA_LABELS } from '@/lib/catalogo-itens'
 import type { ItemCatalogo } from '@/types/mudafacil'
 import { cn } from '@/design-system/utils'
@@ -76,6 +77,8 @@ interface CatalogoPainelProps {
 export function CatalogoPainel({ busca = '', onAdd }: CatalogoPainelProps) {
   const [categoriaSelecionada, setCategoriaSelecionada] = useState<string>('todos')
   const [buscaLocal, setBuscaLocal] = useState(busca)
+  const t = useTranslations('catalog')
+  const tCat = useTranslations('app.categories')
 
   const itensFiltrados = CATALOGO_ITENS.filter((item) => {
     const matchCategoria = categoriaSelecionada === 'todos' || item.categoria === categoriaSelecionada
@@ -88,7 +91,7 @@ export function CatalogoPainel({ busca = '', onAdd }: CatalogoPainelProps) {
       {/* Busca */}
       <input
         type="search"
-        placeholder="Buscar item..."
+        placeholder={t('searchPlaceholder')}
         value={buscaLocal}
         onChange={(e) => setBuscaLocal(e.target.value)}
         className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#E83500] focus:border-[#E83500]"
@@ -105,7 +108,7 @@ export function CatalogoPainel({ busca = '', onAdd }: CatalogoPainelProps) {
               : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
           )}
         >
-          Todos
+          {t('all')}
         </button>
         {CATEGORIAS.map((cat) => (
           <button
@@ -118,13 +121,13 @@ export function CatalogoPainel({ busca = '', onAdd }: CatalogoPainelProps) {
                 : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
             )}
           >
-            {CATEGORIA_LABELS[cat]}
+            {tCat(cat as Parameters<typeof tCat>[0])}
           </button>
         ))}
       </div>
 
       <p className="text-xs text-gray-400">
-        {itensFiltrados.length} {onAdd ? 'itens · toque + para adicionar' : 'itens · arraste para a lista'}
+        {itensFiltrados.length} {onAdd ? t('tapToAdd') : t('dragToAdd')}
       </p>
 
       {/* Grid de itens */}

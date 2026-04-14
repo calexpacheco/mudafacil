@@ -17,7 +17,6 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     Resend({
       apiKey: process.env.AUTH_RESEND_KEY!,
       from: 'MudaFácil <onboarding@resend.dev>',
-      allowDangerousEmailAccountLinking: true,
     }),
   ],
   pages: {

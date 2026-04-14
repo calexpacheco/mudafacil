@@ -7,7 +7,7 @@ import type { CaminhaoInfo, ItemPositionado } from '@/types/mudafacil'
 
 function makeItem(id: string, uid: string): ItemPositionado {
   const item = CATALOGO_ITENS.find((i) => i.id === id) ?? CATALOGO_ITENS[0]
-  return { itemId: item.id, item, x: 0, y: 0, rotacao: 0, uid }
+  return { itemId: item.id, item, x: 0, y: 0, rotacao: 0, uid, quantidade: 1 }
 }
 
 function SeletorInterativo({ itens }: { itens: ItemPositionado[] }) {

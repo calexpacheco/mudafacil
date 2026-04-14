@@ -50,6 +50,7 @@ export async function POST(
     x: offset % 200,
     y: Math.floor(offset / 200) * 20,
     rotacao: 0,
+    quantidade: 1,
   }
 
   itensPositionados = [...itensPositionados, novoItem]

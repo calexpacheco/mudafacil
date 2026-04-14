@@ -36,7 +36,7 @@ export default async function MudancaPage({ params }: Props) {
   const caminhaoInicial = mudanca.caminhao ?? CAMINHOES[0]
 
   // Cotação contratada mais recente (se houver)
-  const cotacaoContratada = mudanca.cotacoes.find((c) => c.contratada) ?? null
+  const cotacaoContratada = mudanca.cotacoes.find((c: { contratada: boolean }) => c.contratada) ?? null
 
   return (
     <>

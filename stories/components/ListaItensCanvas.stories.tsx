@@ -5,7 +5,7 @@ import type { ItemPositionado } from '@/types/mudafacil'
 
 function makeItem(id: string, uid: string): ItemPositionado {
   const item = CATALOGO_ITENS.find((i) => i.id === id) ?? CATALOGO_ITENS[0]
-  return { itemId: item.id, item, x: 0, y: 0, rotacao: 0, uid }
+  return { itemId: item.id, item, x: 0, y: 0, rotacao: 0, uid, quantidade: 1 }
 }
 
 const meta: Meta = {
@@ -24,7 +24,7 @@ export const Vazio: StoryObj = {
   name: 'Estado vazio — drop zone',
   render: () => (
     <div className="max-w-2xl">
-      <ListaItensCanvas itens={[]} onRemoveItem={() => {}} />
+      <ListaItensCanvas itens={[]} onRemoveItem={() => {}} onQuantidadeChange={() => {}} />
     </div>
   ),
 }
@@ -38,6 +38,7 @@ export const UmItem: StoryObj = {
       <ListaItensCanvas
         itens={[makeItem('cama-casal', 'a1')]}
         onRemoveItem={() => {}}
+        onQuantidadeChange={() => {}}
       />
     </div>
   ),
@@ -55,6 +56,7 @@ export const DoisItens: StoryObj = {
           makeItem('guarda-roupa-4', 'a2'),
         ]}
         onRemoveItem={() => {}}
+        onQuantidadeChange={() => {}}
       />
     </div>
   ),
@@ -76,6 +78,7 @@ export const Multiplos: StoryObj = {
           makeItem('computador',     'b6'),
         ]}
         onRemoveItem={() => {}}
+        onQuantidadeChange={() => {}}
       />
     </div>
   ),
@@ -96,6 +99,7 @@ export const TodasCategorias: StoryObj = {
           makeItem('caixa-g',           'c5'), // caixa — amber
         ]}
         onRemoveItem={() => {}}
+        onQuantidadeChange={() => {}}
       />
     </div>
   ),

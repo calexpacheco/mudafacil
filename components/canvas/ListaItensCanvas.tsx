@@ -175,7 +175,7 @@ function ItemCard({
 interface ListaItensCanvasProps {
   itens: ItemPositionado[]
   onRemoveItem: (uid: string) => void
-  onQuantidadeChange: (uid: string, qty: number) => void
+  onQuantidadeChange?: (uid: string, qty: number) => void
   limiteAtingido?: boolean
 }
 
@@ -242,7 +242,7 @@ export function ListaItensCanvas({
             key={itemPos.uid}
             itemPos={itemPos}
             onRemove={() => onRemoveItem(itemPos.uid)}
-            onQuantidadeChange={(qty) => onQuantidadeChange(itemPos.uid, qty)}
+            onQuantidadeChange={(qty) => onQuantidadeChange?.(itemPos.uid, qty)}
           />
         ))}
 

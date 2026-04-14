@@ -98,12 +98,12 @@ export function FiltrosCotacaoPainel({ filtros, onChange, filtrosAvancados }: Fi
               className="rounded"
               style={{ accentColor: '#E83500' }}
             />
-            Seguro incluso
+            {t('insuranceFilter')}
           </label>
 
           {/* Tipo de caminhão */}
           <div>
-            <label className="text-xs text-gray-500 font-medium mb-1.5 block">Tipo de veículo</label>
+            <label className="text-xs text-gray-500 font-medium mb-1.5 block">{t('vehicleType')}</label>
             <div className="flex flex-wrap gap-1.5">
               {[undefined, 'FIORINO', 'HR', 'TRES_QUARTOS', 'BAU'].map((tipo) => (
                 <button
@@ -116,7 +116,7 @@ export function FiltrosCotacaoPainel({ filtros, onChange, filtrosAvancados }: Fi
                       : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                   )}
                 >
-                  {tipo === undefined ? 'Todos' : tipo === 'TRES_QUARTOS' ? '3/4' : tipo}
+                  {tipo === undefined ? t('allVehicles') : tipo === 'TRES_QUARTOS' ? '3/4' : tipo}
                 </button>
               ))}
             </div>
@@ -126,7 +126,7 @@ export function FiltrosCotacaoPainel({ filtros, onChange, filtrosAvancados }: Fi
             onClick={() => onChange({ ordenarPor: 'preco' })}
             className="text-xs text-gray-400 underline text-left hover:text-gray-600 cursor-pointer"
           >
-            Limpar filtros
+            {t('clearFilters')}
           </button>
         </>
       )}

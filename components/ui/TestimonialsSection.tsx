@@ -63,14 +63,29 @@ function generateSquares() {
 
 function ShuffleGrid() {
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
-  const [squares, setSquares] = useState(generateSquares)
+  // Inicia com ordem fixa (determinística) para evitar hydration mismatch.
+  // O shuffle começa apenas no cliente, dentro do useEffect.
+  const [squares, setSquares] = useState(() => squareData.map((sq) => (
+    <motion.div
+      key={sq.id}
+      layout
+      transition={{ duration: 1.5, type: 'spring' }}
+      className="w-full h-full rounded-lg overflow-hidden bg-gray-100"
+      style={{
+        backgroundImage: `url(${sq.src})`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center top',
+      }}
+    />
+  )))
 
   useEffect(() => {
     function run() {
       setSquares(generateSquares())
       timeoutRef.current = setTimeout(run, 3000)
     }
-    run()
+    // Aguarda um tick para não conflitar com a hidratação inicial
+    timeoutRef.current = setTimeout(run, 3000)
     return () => {
       if (timeoutRef.current) clearTimeout(timeoutRef.current)
     }

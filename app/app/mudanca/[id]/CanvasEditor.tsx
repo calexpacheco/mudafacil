@@ -17,6 +17,7 @@ import { NovaMudancaModal } from '@/components/ui/NovaMudancaModal'
 import { useRouter } from 'next/navigation'
 import { createPortal } from 'react-dom'
 import { useTranslations } from 'next-intl'
+import { itemKey } from '@/lib/item-i18n'
 
 // ─── Preço dinâmico das cotações ─────────────────────────────────────────────
 // Ajusta o preço base de cada cotação conforme volume atual, nº de caminhões e urgência.
@@ -63,16 +64,18 @@ const CATEGORIA_COR: Record<string, string> = {
 }
 
 function DragPreviewCard({ item }: { item: ItemCatalogo }) {
-  const t = useTranslations('app.categories')
+  const tCat = useTranslations('app.categories')
+  const tItems = useTranslations('items')
   const cor = CATEGORIA_COR[item.categoria] ?? 'bg-gray-400'
-  const cat = t(item.categoria as Parameters<typeof t>[0]) ?? item.categoria
+  const cat = tCat(item.categoria as Parameters<typeof tCat>[0]) ?? item.categoria
+  const nomeItem = tItems(itemKey(item.id) as Parameters<typeof tItems>[0])
   return (
     <div className="flex items-center gap-3 px-4 py-3 bg-white rounded-xl border-2 border-blue-400 shadow-2xl w-72 cursor-grabbing rotate-2 opacity-95">
       <div className={`w-9 h-9 rounded-full flex-shrink-0 flex items-center justify-center font-bold text-sm text-white ${cor}`}>
-        {item.nome.charAt(0).toUpperCase()}
+        {nomeItem.charAt(0).toUpperCase()}
       </div>
       <div className="flex-1 min-w-0">
-        <p className="text-sm font-semibold text-gray-900 truncate">{item.nome}</p>
+        <p className="text-sm font-semibold text-gray-900 truncate">{nomeItem}</p>
         <p className="text-xs text-gray-400">
           {cat} · {item.volumeM3.toFixed(2)} m³ · {item.pesoKg} kg
         </p>
@@ -357,6 +360,7 @@ interface CanvasEditorProps {
 
 export function CanvasEditor({ mudancaId, caminhaoInicial, layoutInicial, plan, filtrosAvancados, dataDesejadaInicial = null, cotacaoContratadaInicial = null }: CanvasEditorProps) {
   const t = useTranslations('canvasEditor')
+  const tItems = useTranslations('items')
   const [tab, setTab] = useState<TabType>('canvas')
   const [caminhao, setCaminhao] = useState<CaminhaoInfo>(caminhaoInicial)
   const [filtros, setFiltros] = useState<FiltrosCotacao>({ ordenarPor: 'preco' })
@@ -539,7 +543,7 @@ export function CanvasEditor({ mudancaId, caminhaoInicial, layoutInicial, plan, 
       saveLayout(next, novoCaminhao, novaQtd)
       return next
     })
-    toast.success(t('itemAdded', { name: itemCatalogo.nome }), { duration: 1500 })
+    toast.success(t('itemAdded', { name: tItems(itemKey(itemCatalogo.id) as Parameters<typeof tItems>[0]) }), { duration: 1500 })
   }, [itens, limiteAtingido, autoSelecionarVeiculo, saveLayout])
 
   const handleDragEnd = useCallback((event: DragEndEvent) => {

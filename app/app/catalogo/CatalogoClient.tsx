@@ -7,6 +7,7 @@ import { cn } from '@/design-system/utils'
 import type { ItemCatalogo } from '@/types/mudafacil'
 import { IconPackage, IconSearch, IconX, IconRuler } from '@tabler/icons-react'
 import { useTranslations } from 'next-intl'
+import { itemKey } from '@/lib/item-i18n'
 
 interface MudancaSimples {
   id: string
@@ -81,9 +82,12 @@ function ItemCard({
   loading: boolean
 }) {
   const t = useTranslations('catalog')
+  const tItems = useTranslations('items')
+  const tCat = useTranslations('app.categories')
   const cor = CATEGORIA_COR[item.categoria] ?? { bg: 'bg-gray-400', text: 'text-white', badge: 'bg-gray-50 text-gray-600 border-gray-200' }
-  const catLabel = CATEGORIA_LABELS[item.categoria] ?? item.categoria
-  const inicial = item.nome.charAt(0).toUpperCase()
+  const catLabel = tCat(item.categoria as Parameters<typeof tCat>[0]) ?? CATEGORIA_LABELS[item.categoria]
+  const nomeItem = tItems(itemKey(item.id) as Parameters<typeof tItems>[0])
+  const inicial = nomeItem.charAt(0).toUpperCase()
 
   return (
     <div className="flex flex-col gap-3 p-4 rounded-xl border border-gray-200 bg-white hover:shadow-md transition-all hover:border-gray-300">
@@ -93,7 +97,7 @@ function ItemCard({
           {inicial}
         </div>
         <div className="flex-1 min-w-0">
-          <p className="font-semibold text-gray-900 text-sm leading-snug">{item.nome}</p>
+          <p className="font-semibold text-gray-900 text-sm leading-snug">{nomeItem}</p>
           <span className={cn('inline-block mt-1 text-[10px] font-medium px-2 py-0.5 rounded-full border', cor.badge)}>
             {catLabel}
           </span>
@@ -142,14 +146,16 @@ function ItemCard({
 
 export function CatalogoClient({ mudancas }: CatalogoClientProps) {
   const t = useTranslations('catalog')
+  const tItems = useTranslations('items')
   const [busca, setBusca] = useState('')
   const [categoriaFiltro, setCategoriaFiltro] = useState<string | null>(null)
   const [loadingItem, setLoadingItem] = useState<string | null>(null)
   const [pickerItem, setPickerItem] = useState<ItemCatalogo | null>(null)
 
-  // Filtra itens
+  // Filtra itens pelo nome traduzido
   const itensFiltrados = CATALOGO_ITENS.filter((item) => {
-    const matchBusca = !busca || item.nome.toLowerCase().includes(busca.toLowerCase())
+    const nomeTraducao = tItems(itemKey(item.id) as Parameters<typeof tItems>[0])
+    const matchBusca = !busca || nomeTraducao.toLowerCase().includes(busca.toLowerCase())
     const matchCategoria = !categoriaFiltro || item.categoria === categoriaFiltro
     return matchBusca && matchCategoria
   })

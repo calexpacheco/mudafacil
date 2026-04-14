@@ -6,6 +6,7 @@ import type { ItemPositionado } from '@/types/mudafacil'
 import { cn } from '@/design-system/utils'
 import { IconPackage, IconX, IconAlertTriangle, IconRuler } from '@tabler/icons-react'
 import { useTranslations } from 'next-intl'
+import { itemKey } from '@/lib/item-i18n'
 
 // ─── Mapeamentos por categoria ───────────────────────────────────────────────
 
@@ -50,12 +51,14 @@ function ItemCard({
 }) {
   const t = useTranslations('canvas')
   const tCat = useTranslations('app.categories')
+  const tItems = useTranslations('items')
   const [expandido, setExpandido] = useState(false)
   const { item } = itemPos
   const qty = itemPos.quantidade ?? 1
   const cor = getCor(item.categoria)
   const catLabel = tCat(item.categoria as Parameters<typeof tCat>[0]) ?? item.categoria
-  const inicial = item.nome.charAt(0).toUpperCase()
+  const nomeItem = tItems(itemKey(item.id) as Parameters<typeof tItems>[0])
+  const inicial = nomeItem.charAt(0).toUpperCase()
 
   return (
     <div
@@ -80,7 +83,7 @@ function ItemCard({
 
         <div className="flex-1 min-w-0">
           <p className="text-sm font-semibold text-gray-900 truncate leading-snug">
-            {item.nome}
+            {nomeItem}
           </p>
           <p className="text-xs text-gray-400 leading-snug">
             {catLabel}

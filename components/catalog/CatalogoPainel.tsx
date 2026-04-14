@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useDraggable } from '@dnd-kit/core'
 import { useTranslations } from 'next-intl'
+import { itemKey } from '@/lib/item-i18n'
 import { CATALOGO_ITENS, CATEGORIAS, CATEGORIA_LABELS } from '@/lib/catalogo-itens'
 import type { ItemCatalogo } from '@/types/mudafacil'
 import { cn } from '@/design-system/utils'
@@ -26,6 +27,9 @@ function ItemCatalogoCard({
   item: ItemCatalogo
   onAdd?: (item: ItemCatalogo) => void
 }) {
+  const tItems = useTranslations('items')
+  const nomeItem = tItems(itemKey(item.id) as Parameters<typeof tItems>[0])
+
   const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
     id: `catalog-${item.id}`,
     data: { type: 'catalog-item', item },
@@ -48,10 +52,10 @@ function ItemCatalogoCard({
         'cursor-grab active:cursor-grabbing',
         isDragging && 'opacity-30 scale-95'
       )}
-      title={`${item.nome} — ${item.volumeM3.toFixed(3)} m³ · ${item.pesoKg}kg`}
+      title={`${nomeItem} — ${item.volumeM3.toFixed(3)} m³ · ${item.pesoKg}kg`}
     >
       <CategoryIcon categoria={item.categoria} className="text-gray-700" />
-      <span className="text-[10px] font-medium text-gray-700 leading-tight line-clamp-2">{item.nome}</span>
+      <span className="text-[10px] font-medium text-gray-700 leading-tight line-clamp-2">{nomeItem}</span>
       <span className="text-[9px] text-gray-400">{item.volumeM3.toFixed(2)}m³</span>
 
       {/* Botão + — canto inferior direito dentro do card */}
@@ -60,7 +64,7 @@ function ItemCatalogoCard({
           onPointerDown={(e) => e.stopPropagation()}
           onClick={handleAdd}
           className="absolute bottom-1 right-1 w-4 h-4 rounded-full bg-gray-700 hover:bg-gray-900 active:scale-90 flex items-center justify-center cursor-pointer transition-all"
-          aria-label={`Adicionar ${item.nome}`}
+          aria-label={`+ ${nomeItem}`}
         >
           <IconPlus size={9} stroke={2.5} className="text-white" />
         </button>
@@ -79,10 +83,12 @@ export function CatalogoPainel({ busca = '', onAdd }: CatalogoPainelProps) {
   const [buscaLocal, setBuscaLocal] = useState(busca)
   const t = useTranslations('catalog')
   const tCat = useTranslations('app.categories')
+  const tItems = useTranslations('items')
 
   const itensFiltrados = CATALOGO_ITENS.filter((item) => {
     const matchCategoria = categoriaSelecionada === 'todos' || item.categoria === categoriaSelecionada
-    const matchBusca = !buscaLocal || item.nome.toLowerCase().includes(buscaLocal.toLowerCase())
+    const nomeTraducao = tItems(itemKey(item.id) as Parameters<typeof tItems>[0])
+    const matchBusca = !buscaLocal || nomeTraducao.toLowerCase().includes(buscaLocal.toLowerCase())
     return matchCategoria && matchBusca
   })
 

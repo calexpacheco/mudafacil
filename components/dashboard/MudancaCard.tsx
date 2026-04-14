@@ -2,8 +2,10 @@
 
 import Link from 'next/link'
 import dynamic from 'next/dynamic'
-import { useState, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { MiniMapaPlaceholder } from './MiniMapa'
+import { IconTruck, IconMap, IconCurrencyDollar, IconCheck, IconCalendar, IconPackage } from '@tabler/icons-react'
+import { BotaoDeletarMudanca } from './BotaoDeletarMudanca'
 
 // Leaflet só roda no cliente — carregado dinamicamente
 const MiniMapa = dynamic(
@@ -19,11 +21,12 @@ function MapSkeleton() {
 
 // ─── Tipos de caminhão ────────────────────────────────────────────────────────
 
-const CAMINHAO_ICONES: Record<string, string> = {
-  FIORINO: '🚐',
-  HR: '🚐',
-  TRES_QUARTOS: '🚛',
-  BAU: '🚚',
+// Truck sizes vary by vehicle type (all use IconTruck, size varies)
+const CAMINHAO_SIZES: Record<string, number> = {
+  FIORINO: 16,
+  HR: 16,
+  TRES_QUARTOS: 18,
+  BAU: 18,
 }
 
 // ─── Status ───────────────────────────────────────────────────────────────────
@@ -84,6 +87,11 @@ function MapArea({
   })
   const [loading, setLoading] = useState(false)
 
+  // Sincroniza quando os endereços são editados e o servidor devolve novas coordenadas
+  useEffect(() => {
+    setCoords({ latOrigem, lngOrigem, latDestino, lngDestino })
+  }, [latOrigem, lngOrigem, latDestino, lngDestino])
+
   const temMapa =
     coords.latOrigem != null &&
     coords.lngOrigem != null &&
@@ -135,7 +143,7 @@ function MapArea({
               Buscando...
             </>
           ) : (
-            <>🗺️ Carregar mapa</>
+            <><IconMap size={14} stroke={1.5} className="text-blue-700" /> Carregar mapa</>
           )}
         </button>
       </div>
@@ -145,82 +153,19 @@ function MapArea({
 
 // ─── Edição inline do valor estimado ─────────────────────────────────────────
 
-function PrecoInline({ mudancaId, valorCentavos, melhorCotacaoCentavos, nomeTransportadora }: {
-  mudancaId: string
+function PrecoInline({ valorCentavos, melhorCotacaoCentavos, nomeTransportadora }: {
   valorCentavos: number | null
   melhorCotacaoCentavos: number | null
   nomeTransportadora: string | null
 }) {
-  const [valor, setValor] = useState<number | null>(valorCentavos)
-  const [editando, setEditando] = useState(false)
-  const [input, setInput] = useState('')
-  const [saving, setSaving] = useState(false)
-  const inputRef = useRef<HTMLInputElement>(null)
-
   const fmt = (centavos: number) =>
     new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(centavos / 100)
 
-  function abrirEdicao(e: React.MouseEvent) {
-    e.preventDefault()
-    setInput(valor != null ? (valor / 100).toFixed(2).replace('.', ',') : '')
-    setEditando(true)
-    setTimeout(() => inputRef.current?.focus(), 0)
-  }
-
-  async function salvar(e: React.FormEvent) {
-    e.preventDefault()
-    const numero = parseFloat(input.replace(',', '.'))
-    if (isNaN(numero) || numero < 0) { setEditando(false); return }
-    const centavos = Math.round(numero * 100)
-    setSaving(true)
-    await fetch(`/api/mudancas/${mudancaId}`, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ valorEstimadoCentavos: centavos }),
-    })
-    setValor(centavos)
-    setEditando(false)
-    setSaving(false)
-  }
-
-  function cancelar(e: React.MouseEvent | React.KeyboardEvent) {
-    e.preventDefault()
-    setEditando(false)
-  }
-
-  if (editando) {
+  if (valorCentavos != null) {
     return (
-      <form onSubmit={salvar} onClick={(e) => e.preventDefault()} className="flex items-center gap-1 col-span-2">
-        <span className="text-sm flex-shrink-0">💰</span>
-        <span className="text-xs text-gray-400 flex-shrink-0">R$</span>
-        <input
-          ref={inputRef}
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          onKeyDown={(e) => e.key === 'Escape' && cancelar(e)}
-          placeholder="0,00"
-          className="w-24 text-xs border border-blue-400 rounded px-1.5 py-0.5 outline-none ring-1 ring-blue-200"
-        />
-        <button type="submit" disabled={saving}
-          className="text-[10px] font-semibold text-white bg-blue-600 rounded px-1.5 py-0.5 hover:bg-blue-700 disabled:opacity-50">
-          {saving ? '…' : 'OK'}
-        </button>
-        <button type="button" onClick={cancelar}
-          className="text-[10px] text-gray-400 hover:text-gray-600">✕</button>
-      </form>
-    )
-  }
-
-  // Mostra valor estimado (prioridade) ou melhor cotação (fallback) ou botão de adicionar
-  if (valor != null) {
-    return (
-      <div className="flex items-center gap-1.5 min-w-0 group">
-        <span className="text-sm flex-shrink-0">💰</span>
-        <span className="text-xs font-semibold text-gray-800 truncate">{fmt(valor)}</span>
-        <button onClick={abrirEdicao}
-          className="opacity-0 group-hover:opacity-100 text-[10px] text-gray-400 hover:text-blue-600 transition-opacity flex-shrink-0">
-          ✏️
-        </button>
+      <div className="flex items-center gap-1.5 min-w-0">
+        <IconCurrencyDollar size={16} stroke={1.5} className="text-gray-500 flex-shrink-0" />
+        <span className="text-xs font-semibold text-gray-800 truncate">{fmt(valorCentavos)}</span>
       </div>
     )
   }
@@ -228,24 +173,19 @@ function PrecoInline({ mudancaId, valorCentavos, melhorCotacaoCentavos, nomeTran
   if (melhorCotacaoCentavos != null) {
     return (
       <div className="flex items-center gap-1.5 min-w-0 col-span-2">
-        <span className="text-sm flex-shrink-0">💰</span>
+        <IconCurrencyDollar size={16} stroke={1.5} className="text-gray-500 flex-shrink-0" />
         <div className="flex flex-col min-w-0">
           <span className="text-sm font-bold text-green-700">{fmt(melhorCotacaoCentavos)}</span>
-          <span className="text-[10px] text-gray-500 truncate">
-            ✅ {nomeTransportadora ?? 'Cotação contratada'}
+          <span className="text-[10px] text-gray-500 truncate flex items-center gap-0.5">
+            <IconCheck size={10} stroke={2} className="text-green-600" />
+            {nomeTransportadora ?? 'Cotação contratada'}
           </span>
         </div>
       </div>
     )
   }
 
-  return (
-    <button onClick={abrirEdicao}
-      className="flex items-center gap-1.5 text-xs text-gray-400 hover:text-blue-600 transition-colors">
-      <span className="text-sm">💰</span>
-      <span className="underline underline-offset-2">Adicionar valor</span>
-    </button>
-  )
+  return null
 }
 
 // ─── Props ────────────────────────────────────────────────────────────────────
@@ -290,7 +230,7 @@ export function MudancaCard({
   lngDestino,
 }: MudancaCardProps) {
   const cfg = STATUS_CONFIG[status] ?? STATUS_CONFIG.RASCUNHO
-  const icone = caminhaoTipo ? CAMINHAO_ICONES[caminhaoTipo] ?? '🚛' : null
+  const caminhaoIconeSize = caminhaoTipo ? (CAMINHAO_SIZES[caminhaoTipo] ?? 16) : 16
 
   const dataFormatada = dataDesejada
     ? new Date(dataDesejada).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', year: 'numeric' })
@@ -314,6 +254,12 @@ export function MudancaCard({
             {cfg.label}
           </span>
         </div>
+        {/* Botão deletar sobreposto no mapa (canto direito) — z-index alto para ficar acima dos layers do Leaflet */}
+        <div className="absolute top-2 right-2" style={{ zIndex: 1000 }}>
+          <div className="bg-white/90 backdrop-blur-sm rounded-lg shadow-sm">
+            <BotaoDeletarMudanca mudancaId={id} variant="icon" />
+          </div>
+        </div>
       </div>
 
       {/* Corpo do cartão — clicável para o canvas */}
@@ -322,13 +268,18 @@ export function MudancaCard({
         className="flex flex-col gap-3 p-4"
       >
         {/* Rota A → B */}
-        <div className="flex flex-col gap-1.5">
-          <div className="flex items-center gap-2 min-w-0">
+        <div className="flex gap-2 min-w-0">
+          <div className="flex flex-col items-center flex-shrink-0 pt-0.5">
             <div className="w-4 h-4 rounded-full bg-blue-600 flex items-center justify-center text-white text-[9px] font-bold flex-shrink-0">A</div>
-            <p className="text-sm font-medium text-gray-900 truncate leading-tight">{enderecoOrigem}</p>
-          </div>
-          <div className="flex items-center gap-2 min-w-0">
+            <div className="flex-1 flex flex-col justify-center gap-0.5 my-1">
+              {[...Array(3)].map((_, i) => (
+                <div key={i} className="w-px h-1.5 bg-gray-300 mx-auto" />
+              ))}
+            </div>
             <div className="w-4 h-4 rounded-full bg-orange-500 flex items-center justify-center text-white text-[9px] font-bold flex-shrink-0">B</div>
+          </div>
+          <div className="flex flex-col justify-between min-w-0 flex-1 gap-2">
+            <p className="text-sm font-medium text-gray-900 truncate leading-tight">{enderecoOrigem}</p>
             <p className="text-sm font-medium text-gray-900 truncate leading-tight">{enderecoDestino}</p>
           </div>
         </div>
@@ -339,28 +290,27 @@ export function MudancaCard({
         <div className="grid grid-cols-2 gap-y-2 gap-x-3">
           {dataFormatada && (
             <div className="flex items-center gap-1.5 min-w-0">
-              <span className="text-sm flex-shrink-0">📅</span>
+              <IconCalendar size={16} stroke={1.5} className="text-gray-500 flex-shrink-0" />
               <span className="text-xs text-gray-600 truncate">{dataFormatada}</span>
             </div>
           )}
 
           {/* Preço — sempre visível, com edição inline */}
           <PrecoInline
-            mudancaId={id}
             valorCentavos={valorEstimadoCentavos}
             melhorCotacaoCentavos={melhorCotacaoCentavos}
             nomeTransportadora={nomeTransportadoraContratada}
           />
 
-          {(caminhaoNome || icone) && (
+          {caminhaoNome && (
             <div className="flex items-center gap-1.5 min-w-0">
-              <span className="text-sm flex-shrink-0">{icone ?? '🚛'}</span>
-              <span className="text-xs text-gray-600 truncate">{caminhaoNome ?? 'Sem caminhão'}</span>
+              <IconTruck size={caminhaoIconeSize} stroke={1.5} className="text-gray-500 flex-shrink-0" />
+              <span className="text-xs text-gray-600 truncate">{caminhaoNome}</span>
             </div>
           )}
 
           <div className="flex items-center gap-1.5">
-            <span className="text-sm flex-shrink-0">📦</span>
+            <IconPackage size={16} stroke={1.5} className="text-gray-500 flex-shrink-0" />
             <span className="text-xs text-gray-600">{totalItens} iten{totalItens !== 1 ? 's' : ''}</span>
           </div>
         </div>

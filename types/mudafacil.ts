@@ -32,7 +32,8 @@ export interface ItemPositionado {
   x: number
   y: number
   rotacao: number
-  uid: string // instância única no canvas
+  uid: string        // instância única no canvas
+  quantidade: number // quantas unidades deste item (padrão 1)
 }
 
 export interface ResumoCanvas {

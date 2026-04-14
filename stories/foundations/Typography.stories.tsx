@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/nextjs'
 import { typography } from '@/design-system/tokens'
+import { IconLock } from '@tabler/icons-react'
 
 const meta: Meta = {
   title: 'Foundations/Typography',
@@ -20,8 +21,8 @@ export const TypeScale: StoryObj = {
       <div>
         <h2 className="text-lg font-bold text-gray-900 mb-1">Type Scale</h2>
         <p className="text-sm text-gray-500 mb-8">
-          Escala tipográfica do MudaFácil. Família principal:{' '}
-          <strong>Inter</strong>. Monospace: <strong>JetBrains Mono</strong>.
+          Escala tipográfica do MudaFácil. Heading:{' '}
+          <strong>Barlow</strong>. Corpo: <strong>Inter</strong>. Monospace: <strong>JetBrains Mono</strong>.
         </p>
 
         <div className="flex flex-col gap-6 divide-y divide-gray-100">
@@ -108,11 +109,36 @@ export const FontFamilies: StoryObj = {
         </p>
 
         <div className="flex flex-col gap-8">
-          {/* Sans */}
+          {/* Barlow — Heading */}
+          <div className="p-6 rounded-xl border-2 border-[#E83500] bg-white">
+            <div className="flex items-center gap-3 mb-4">
+              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-[#FEF0EA] text-[#E83500]">
+                Heading
+              </span>
+              <h3 className="text-base font-semibold text-gray-900">Barlow</h3>
+              <span className="text-xs text-gray-400 font-mono">geometric sans-serif</span>
+            </div>
+            <p className="text-4xl font-bold text-gray-900 mb-2" style={{ fontFamily: 'Barlow, sans-serif' }}>
+              Aa Bb Cc 0123
+            </p>
+            <p className="text-sm text-gray-600 mb-2" style={{ fontFamily: 'Barlow, sans-serif' }}>
+              ABCDEFGHIJKLMNOPQRSTUVWXYZ<br />
+              abcdefghijklmnopqrstuvwxyz<br />
+              0123456789 !@#$%&*()
+            </p>
+            <p className="text-2xl font-extrabold text-[#E83500] mb-4" style={{ fontFamily: 'Barlow, sans-serif' }}>
+              Muda sem estresse — We move with you
+            </p>
+            <p className="text-sm text-gray-500">
+              Usada em: h1, h2, h3, h4, h5, h6 — headings de página, seções, cards.
+            </p>
+          </div>
+
+          {/* Inter — Body */}
           <div className="p-6 rounded-xl border border-gray-200 bg-white">
             <div className="flex items-center gap-3 mb-4">
-              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-blue-100 text-blue-700">
-                Principal
+              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-gray-100 text-gray-600">
+                Corpo
               </span>
               <h3 className="text-base font-semibold text-gray-900">Inter</h3>
               <span className="text-xs text-gray-400 font-mono">sans-serif</span>
@@ -126,7 +152,7 @@ export const FontFamilies: StoryObj = {
               0123456789 !@#$%&*()
             </p>
             <p className="text-sm text-gray-500">
-              Usada em: toda a interface — textos, labels, botões, headings.
+              Usada em: textos de corpo, labels, descrições, botões, inputs.
             </p>
           </div>
 
@@ -199,8 +225,8 @@ export const TextStyles: StoryObj = {
         {/* Alerta de paywall */}
         <div>
           <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Paywall / Alerta</p>
-          <div className="p-6 rounded-xl border-2 border-dashed border-blue-200 bg-blue-50 text-center">
-            <p className="text-4xl mb-3">🔒</p>
+          <div className="p-6 rounded-xl border-2 border-dashed border-[#FCC1A9] bg-[#FEF0EA] text-center">
+            <div className="flex justify-center mb-3"><IconLock size={48} stroke={1.5} className="text-gray-700" /></div>
             <p className="font-semibold text-gray-900">Recurso PRO</p>
             <p className="text-sm text-gray-500 mt-1">
               Assine o MudaFácil PRO por R$ 29,90/mês para desbloquear este recurso.

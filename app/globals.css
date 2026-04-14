@@ -1,12 +1,18 @@
 @import "tailwindcss";
 
-/* MudaFácil Design Tokens */
+/* ─── MudaFácil — Identidade Visual ──────────────────────────────────────────
+   Paleta inspirada em brand bold de logística (vermelho vibrante + dark)
+   Fonte heading: Barlow | Fonte body: Inter
+────────────────────────────────────────────────────────────────────────────── */
+
 :root {
   /* Brand */
-  --color-primary: #2563EB;
-  --color-primary-hover: #1d4ed8;
-  --color-accent: #F59E0B;
-  --color-accent-hover: #d97706;
+  --color-primary:       #E83500;
+  --color-primary-hover: #C42A08;
+  --color-primary-light: #FEF0EA;
+  --color-primary-dark:  #1A0808;
+  --color-accent:        #F59E0B;
+  --color-accent-hover:  #d97706;
 
   /* Background */
   --color-bg-page: #F8FAFC;
@@ -14,23 +20,42 @@
   --color-bg-muted: #f1f5f9;
 
   /* Text */
-  --color-text-primary: #0f172a;
+  --color-text-primary:   #0f172a;
   --color-text-secondary: #475569;
-  --color-text-muted: #94a3b8;
+  --color-text-muted:     #94a3b8;
 
   /* Border */
-  --color-border: #e2e8f0;
-  --color-border-focus: #2563EB;
+  --color-border:       #e2e8f0;
+  --color-border-focus: #E83500;
 
-  /* Font */
-  --font-sans: var(--font-inter), system-ui, sans-serif;
+  /* Fonts */
+  --font-sans:    var(--font-inter), system-ui, sans-serif;
+  --font-heading: var(--font-barlow), 'Barlow', system-ui, sans-serif;
 }
+
+/* ─── Tailwind v4 — Override blue scale com brand red ────────────────────── */
+/* Todos os componentes que usam blue-* herdam automaticamente a paleta brand */
 
 @theme inline {
   --color-background: var(--color-bg-page);
   --color-foreground: var(--color-text-primary);
-  --font-sans: var(--font-sans);
+  --font-sans:    var(--font-sans);
+  --font-heading: var(--font-heading);
+
+  /* Override blue → brand red */
+  --color-blue-50:  #FEF0EA;
+  --color-blue-100: #FDE0D4;
+  --color-blue-200: #FCC1A9;
+  --color-blue-300: #FA9370;
+  --color-blue-400: #F76040;
+  --color-blue-500: #F04A20;
+  --color-blue-600: #E83500;
+  --color-blue-700: #C42A08;
+  --color-blue-800: #9A2108;
+  --color-blue-900: #7A1A06;
 }
+
+/* ─── Base ────────────────────────────────────────────────────────────────── */
 
 body {
   background: var(--color-bg-page);
@@ -38,7 +63,20 @@ body {
   font-family: var(--font-sans);
 }
 
-/* Smooth transitions globais */
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-heading);
+  letter-spacing: -0.02em;
+}
+
+/* ─── Smooth transitions globais ─────────────────────────────────────────── */
+
 *, *::before, *::after {
   transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
 }
+
+/* ─── Scrollbar ──────────────────────────────────────────────────────────── */
+
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 99px; }
+::-webkit-scrollbar-thumb:hover { background: #94A3B8; }

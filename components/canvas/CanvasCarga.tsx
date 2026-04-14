@@ -8,6 +8,7 @@ import {
 } from '@dnd-kit/core'
 import type { CaminhaoInfo, ItemCatalogo, ItemPositionado } from '@/types/mudafacil'
 import { cn } from '@/design-system/utils'
+import { IconBed, IconToolsKitchen2, IconSofa, IconDeviceLaptop, IconPackage, IconTrash, IconAlertTriangle } from '@tabler/icons-react'
 
 // ─── Constantes de escala ────────────────────────────────────────────────────
 const CANVAS_WIDTH = 600
@@ -59,7 +60,7 @@ function ItemNoCanvas({
         selected ? 'border-blue-600 bg-blue-50 shadow-lg' : 'border-blue-300 bg-blue-50/70'
       )}
     >
-      <span className="text-lg leading-none">{getEmoji(itemPos.item.categoria)}</span>
+      <CategoryIconCanvas categoria={itemPos.item.categoria} />
       <span className="text-center px-0.5 leading-tight line-clamp-2 text-gray-700">
         {itemPos.item.nome}
       </span>
@@ -67,15 +68,15 @@ function ItemNoCanvas({
   )
 }
 
-function getEmoji(cat: string) {
-  const map: Record<string, string> = {
-    quarto: '🛏️',
-    cozinha: '🍳',
-    sala: '🛋️',
-    escritorio: '💻',
-    caixa: '📦',
+function CategoryIconCanvas({ categoria }: { categoria: string }) {
+  const icons: Record<string, React.ReactNode> = {
+    quarto:     <IconBed size={16} stroke={1.5} className="text-gray-700" />,
+    cozinha:    <IconToolsKitchen2 size={16} stroke={1.5} className="text-gray-700" />,
+    sala:       <IconSofa size={16} stroke={1.5} className="text-gray-700" />,
+    escritorio: <IconDeviceLaptop size={16} stroke={1.5} className="text-gray-700" />,
+    caixa:      <IconPackage size={16} stroke={1.5} className="text-gray-700" />,
   }
-  return map[cat] ?? '📦'
+  return <>{icons[categoria] ?? <IconPackage size={16} stroke={1.5} className="text-gray-700" />}</>
 }
 
 // ─── Área droppable do caminhão ──────────────────────────────────────────────
@@ -168,16 +169,18 @@ export function CanvasCarga({
             </button>
             <button
               onClick={() => { onRemoveItem(selectedUid); setSelectedUid(null) }}
-              className="text-xs px-3 py-1.5 rounded-lg bg-red-100 text-red-700 hover:bg-red-200"
+              className="text-xs px-3 py-1.5 rounded-lg bg-red-100 text-red-700 hover:bg-red-200 flex items-center gap-1"
             >
-              🗑 Remover
+              <IconTrash size={14} stroke={1.5} className="text-red-700" />
+              Remover
             </button>
           </div>
         )}
 
         {limiteAtingido && (
-          <p className="text-xs text-amber-600 font-medium">
-            ⚠️ Limite de itens atingido no plano Free. Faça upgrade para adicionar mais.
+          <p className="text-xs text-amber-600 font-medium flex items-center gap-1">
+            <IconAlertTriangle size={14} stroke={1.5} className="text-amber-600" />
+            Limite de itens atingido no plano Free. Faça upgrade para adicionar mais.
           </p>
         )}
       </div>

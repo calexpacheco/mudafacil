@@ -1,4 +1,5 @@
 import { signIn } from '@/lib/auth'
+import { IconTruck } from '@tabler/icons-react'
 
 export default async function LoginPage({
   searchParams,
@@ -7,22 +8,24 @@ export default async function LoginPage({
 }) {
   const { callbackUrl } = await searchParams
   return (
-    <main className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
+    <main className="min-h-screen flex items-center justify-center bg-white px-4">
       <div className="w-full max-w-md">
         {/* Logo */}
         <div className="text-center mb-8">
-          <div className="text-5xl mb-3">🚛</div>
-          <h1 className="text-2xl font-bold text-gray-900">
-            Muda<span className="text-blue-600">Fácil</span>
+          <div className="w-16 h-16 mx-auto mb-4 bg-[#E83500] rounded-2xl flex items-center justify-center shadow-xl shadow-[#E83500]/30">
+            <IconTruck size={36} stroke={1.5} className="text-white" />
+          </div>
+          <h1 className="text-2xl font-extrabold text-gray-900">
+            Muda<span className="text-[#E83500]">Fácil</span>
           </h1>
           <p className="text-gray-500 text-sm mt-2">Entre para planejar sua mudança</p>
         </div>
 
-        <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-8 flex flex-col gap-4">
+        <div className="bg-white rounded-2xl border border-gray-200 shadow-2xl p-8 flex flex-col gap-4">
           {/* Google OAuth */}
           <form action={async () => {
             'use server'
-            await signIn('google', { redirectTo: callbackUrl ?? '/dashboard' })
+            await signIn('google', { redirectTo: callbackUrl ?? '/app/dashboard' })
           }}>
             <button
               type="submit"
@@ -43,18 +46,18 @@ export default async function LoginPage({
           <form action={async (formData: FormData) => {
             'use server'
             const email = formData.get('email') as string
-            await signIn('resend', { email, redirectTo: callbackUrl ?? '/dashboard' })
+            await signIn('resend', { email, redirectTo: callbackUrl ?? '/app/dashboard' })
           }} className="flex flex-col gap-3">
             <input
               name="email"
               type="email"
               placeholder="seu@email.com"
               required
-              className="w-full px-4 py-3 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-4 py-3 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-[#E83500] focus:border-[#E83500]"
             />
             <button
               type="submit"
-              className="w-full py-3 rounded-xl bg-blue-600 text-white font-semibold text-sm hover:bg-blue-700 transition-colors"
+              className="w-full py-3 rounded-xl bg-[#E83500] text-white font-bold text-sm hover:bg-[#C42A08] transition-colors shadow-lg shadow-[#E83500]/25"
             >
               Enviar link mágico
             </button>

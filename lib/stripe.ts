@@ -43,8 +43,8 @@ export async function createCheckoutSession({
         quantity: 1,
       },
     ],
-    success_url: `${process.env.NEXT_PUBLIC_APP_URL}/settings/billing?success=true`,
-    cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/settings/billing?canceled=true`,
+    success_url: `${process.env.NEXT_PUBLIC_APP_URL}/app/billing?success=true`,
+    cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/app/billing?canceled=true`,
     metadata: { userId },
     subscription_data: { metadata: { userId } },
   })
@@ -56,7 +56,7 @@ export async function createPortalSession(customerId: string) {
   const s = getStripe()
   const session = await s.billingPortal.sessions.create({
     customer: customerId,
-    return_url: `${process.env.NEXT_PUBLIC_APP_URL}/settings/billing`,
+    return_url: `${process.env.NEXT_PUBLIC_APP_URL}/app/billing`,
   })
   return session
 }

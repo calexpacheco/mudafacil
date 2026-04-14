@@ -12,10 +12,12 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     Google({
       clientId: process.env.AUTH_GOOGLE_ID!,
       clientSecret: process.env.AUTH_GOOGLE_SECRET!,
+      allowDangerousEmailAccountLinking: true,
     }),
     Resend({
       apiKey: process.env.AUTH_RESEND_KEY!,
       from: 'MudaFácil <onboarding@resend.dev>',
+      allowDangerousEmailAccountLinking: true,
     }),
   ],
   pages: {
@@ -36,26 +38,35 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     },
   },
   callbacks: {
-    async jwt({ token, user }) {
-      if (user) {
-        token.id = user.id
-        // Busca dados do banco no primeiro login
-        const dbUser = await db.user.findUnique({
-          where: { id: user.id! },
-          select: { plan: true, trialEnd: true, subscriptionEnd: true },
-        })
-        token.plan = dbUser?.plan ?? 'FREE'
-        token.trialEnd = dbUser?.trialEnd ?? null
-        token.subscriptionEnd = dbUser?.subscriptionEnd ?? null
+    async jwt({ token, user, account }) {
+      // Primeiro login: user está presente. token.sub = id do usuário (sempre preenchido)
+      if (user || account) {
+        const userId = user?.id ?? token.sub!
+        token.id = userId
+        try {
+          const dbUser = await db.user.findUnique({
+            where: { id: userId },
+            select: { plan: true, trialEnd: true, subscriptionEnd: true },
+          })
+          token.plan = dbUser?.plan ?? 'FREE'
+          token.trialEnd = dbUser?.trialEnd ?? null
+          token.subscriptionEnd = dbUser?.subscriptionEnd ?? null
+        } catch {
+          token.plan = 'FREE'
+          token.trialEnd = null
+          token.subscriptionEnd = null
+        }
       }
+      // Garante que token.id nunca fica undefined
+      if (!token.id) token.id = token.sub
       return token
     },
     async session({ session, token }) {
       if (session.user) {
-        session.user.id = token.id as string
-        session.user.plan = token.plan as 'FREE' | 'TRIAL' | 'PRO'
-        session.user.trialEnd = token.trialEnd as Date | null
-        session.user.subscriptionEnd = token.subscriptionEnd as Date | null
+        session.user.id = (token.id ?? token.sub) as string
+        session.user.plan = (token.plan ?? 'FREE') as 'FREE' | 'TRIAL' | 'PRO'
+        session.user.trialEnd = (token.trialEnd ?? null) as Date | null
+        session.user.subscriptionEnd = (token.subscriptionEnd ?? null) as Date | null
       }
       return session
     },

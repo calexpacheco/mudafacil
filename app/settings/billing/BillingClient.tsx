@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import type { Plan } from '@/lib/prisma-types'
+import { IconCheck, IconX } from '@tabler/icons-react'
 
 interface BillingClientProps {
   user: {
@@ -104,7 +105,7 @@ export function BillingClient({ user }: BillingClientProps) {
               'Comparação lado a lado',
             ].map((item) => (
               <li key={item} className="text-sm text-gray-700 flex items-center gap-2">
-                <span className="text-blue-600 font-bold">✓</span>
+                <IconCheck size={16} stroke={2} className="text-blue-600 flex-shrink-0" />
                 {item}
               </li>
             ))}

@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/nextjs'
+import { IconSearch, IconTruck } from '@tabler/icons-react'
 
 const meta: Meta = {
   title: 'UI/Forms',
@@ -95,7 +96,7 @@ export const Inputs: StoryObj = {
           <div>
             <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-4">Search Input</h3>
             <div className="relative">
-              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">🔍</span>
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"><IconSearch size={16} stroke={1.5} /></span>
               <input
                 type="text"
                 placeholder="Buscar item..."
@@ -202,7 +203,7 @@ export const LoginForm: StoryObj = {
     <div className="min-h-screen bg-gray-50 flex items-center justify-center p-8">
       <div className="w-full max-w-sm">
         <div className="text-center mb-8">
-          <h1 className="text-2xl font-bold text-gray-900">🚛 MudaFácil</h1>
+          <h1 className="text-2xl font-bold text-gray-900 flex items-center justify-center gap-2"><IconTruck size={24} stroke={1.5} className="text-gray-700" /> MudaFácil</h1>
           <p className="text-sm text-gray-500 mt-2">Entre com seu e-mail para começar</p>
         </div>
 

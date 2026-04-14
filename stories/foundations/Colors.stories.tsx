@@ -126,10 +126,10 @@ export const PrimaryPalette: StoryObj = {
   render: () => (
     <div className="p-8 flex flex-col gap-8">
       <div>
-        <h2 className="text-lg font-bold text-gray-900 mb-1">Primary — Azul</h2>
+        <h2 className="text-lg font-bold text-gray-900 mb-1">Primary — Vermelho Brand</h2>
         <p className="text-sm text-gray-500 mb-6">
-          Escala completa do azul primário. Use{' '}
-          <strong>primary-600</strong> como cor principal.
+          Escala completa do vermelho primário. Use{' '}
+          <strong>primary-600 (#E83500)</strong> como cor principal.
         </p>
         <div className="grid grid-cols-5 md:grid-cols-10 gap-2 mb-6">
           {Object.entries(colors.primary).map(([key, hex]) => (
@@ -139,7 +139,7 @@ export const PrimaryPalette: StoryObj = {
                 style={{ backgroundColor: hex }}
               >
                 {key === '600' && (
-                  <span className="absolute -top-2 -right-2 bg-blue-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold">
+                  <span className="absolute -top-2 -right-2 bg-[#E83500] text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold">
                     ★
                   </span>
                 )}
@@ -327,7 +327,7 @@ export const FullTokenMap: StoryObj = {
         Todas as cores do sistema em uma única visualização.
       </p>
       <div className="flex flex-col gap-6">
-        <PaletteRow label="Primary (Azul)" scale={colors.primary} />
+        <PaletteRow label="Primary (Vermelho Brand)" scale={colors.primary} />
         <PaletteRow label="Accent (Âmbar)" scale={colors.accent} />
         <PaletteRow label="Gray (Neutro)" scale={colors.gray} />
         <div>

@@ -2,14 +2,19 @@
 
 import type { CotacaoCard } from '@/types/mudafacil'
 import { cn } from '@/design-system/utils'
+import { IconTruck, IconShield, IconTruckDelivery, IconCalendar, IconCheck, IconAlertTriangle, IconStar } from '@tabler/icons-react'
 
 function Estrelas({ nota }: { nota: number }) {
   return (
-    <div className="flex gap-0.5">
+    <div className="flex gap-0.5 items-center">
       {[1, 2, 3, 4, 5].map((i) => (
-        <span key={i} className={cn('text-xs', i <= Math.round(nota) ? 'text-amber-400' : 'text-gray-200')}>
-          ★
-        </span>
+        <IconStar
+          key={i}
+          size={12}
+          stroke={1.5}
+          className={cn(i <= Math.round(nota) ? 'text-amber-400' : 'text-gray-200')}
+          fill={i <= Math.round(nota) ? 'currentColor' : 'none'}
+        />
       ))}
       <span className="text-xs text-gray-500 ml-1">{nota.toFixed(1)}</span>
     </div>
@@ -21,7 +26,7 @@ function formatCurrency(centavos: number) {
 }
 
 function formatDate(dateStr: string) {
-  return new Date(dateStr).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' })
+  return new Date(dateStr).toLocaleDateString('pt-BR', { day: 'numeric', month: 'numeric' })
 }
 
 interface CardCotacaoProps {
@@ -43,15 +48,15 @@ export function CardCotacao({
 
   return (
     <div className={cn(
-      'flex flex-col gap-3 p-4 rounded-xl border bg-white transition-all',
+      'flex flex-col gap-3 p-4 rounded-xl border bg-white transition-all min-w-0 overflow-hidden',
       isSuccess
         ? 'border-green-300 shadow-md shadow-green-50 ring-1 ring-green-200'
         : 'border-gray-200 hover:shadow-md'
     )}>
       {/* Header */}
       <div className="flex items-start gap-3">
-        <div className="w-10 h-10 rounded-lg bg-gray-100 flex items-center justify-center text-xl flex-shrink-0">
-          🚛
+        <div className="w-10 h-10 rounded-lg bg-gray-100 flex items-center justify-center flex-shrink-0">
+          <IconTruck size={22} stroke={1.5} className="text-gray-700" />
         </div>
         <div className="flex-1 min-w-0">
           <p className="font-semibold text-gray-900 text-sm truncate">{cotacao.transportadora.nome}</p>
@@ -63,40 +68,42 @@ export function CardCotacao({
         <div className="text-right flex-shrink-0">
           <p className="text-xl font-bold text-gray-900">{formatCurrency(cotacao.precoCentavos)}</p>
           <p className="text-xs text-gray-400">por mudança</p>
+          {cotacao.seguroIncluso && (
+            <span className="inline-flex items-center gap-1 text-[10px] font-medium text-green-700 mt-1">
+              <IconShield size={12} stroke={1.5} className="text-green-700" /> Seguro incluso
+            </span>
+          )}
         </div>
       </div>
 
-      {/* Detalhes */}
-      <div className="flex flex-wrap gap-2">
-        <Badge icon="🚚" label={cotacao.caminhao.nome} />
-        <Badge icon="📅" label={`Disponível ${formatDate(cotacao.dataDisponivel)}`} />
-        {cotacao.seguroIncluso && (
-          <Badge icon="🛡️" label="Seguro incluso" className="bg-green-50 text-green-700 border-green-200" />
-        )}
-        <Badge icon="⏳" label={`Válido até ${formatDate(cotacao.validade)}`} className="bg-gray-50" />
+      {/* Detalhes — apenas badges de largura previsível, sem seguro */}
+      <div className="flex flex-wrap gap-1.5">
+        <Badge icon={<IconTruckDelivery size={12} stroke={1.5} />} label={cotacao.caminhao.nome} />
+        <Badge icon={<IconCalendar size={12} stroke={1.5} />} label={`Disponível ${formatDate(cotacao.dataDisponivel)}`} />
+        <Badge icon={<IconCalendar size={12} stroke={1.5} />} label={`Válido até ${formatDate(cotacao.validade)}`} className="bg-gray-50" />
       </div>
 
       {/* CTA */}
       {isSuccess ? (
-        <div className="w-full py-2.5 rounded-lg bg-green-50 border border-green-200 text-green-700 text-sm font-semibold text-center flex items-center justify-center gap-2">
-          ✅ Cotação contratada
+        <div className="w-full py-1.5 rounded-lg bg-green-50 border border-green-200 text-green-700 text-xs font-semibold text-center flex items-center justify-center gap-1.5">
+          <IconCheck size={14} stroke={2} className="text-green-700" /> Cotação contratada
         </div>
       ) : isError ? (
         <button
           onClick={() => onContratar(cotacao)}
-          className="w-full py-2.5 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm font-semibold hover:bg-red-100 transition-colors"
+          className="w-full py-1.5 rounded-lg bg-red-50 border border-red-200 text-red-700 text-xs font-semibold hover:bg-red-100 cursor-pointer transition-colors flex items-center justify-center gap-1.5"
         >
-          ⚠️ Erro — tentar novamente
+          <IconAlertTriangle size={14} stroke={1.5} className="text-red-700" /> Tentar novamente
         </button>
       ) : (
         <button
           onClick={() => onContratar(cotacao)}
           disabled={isLoading}
-          className="w-full py-2.5 rounded-lg bg-blue-600 text-white text-sm font-semibold hover:bg-blue-700 disabled:opacity-60 transition-colors flex items-center justify-center gap-2"
+          className="w-full py-1.5 rounded-lg bg-blue-600 text-white text-xs font-semibold hover:bg-blue-700 disabled:opacity-60 cursor-pointer transition-colors flex items-center justify-center gap-1.5"
         >
           {isLoading ? (
             <>
-              <span className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+              <span className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin" />
               Contratando...
             </>
           ) : (
@@ -108,11 +115,11 @@ export function CardCotacao({
   )
 }
 
-function Badge({ icon, label, className }: { icon: string; label: string; className?: string }) {
+function Badge({ icon, label, className }: { icon: React.ReactNode; label: string; className?: string }) {
   return (
     <span
       className={cn(
-        'inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full border bg-blue-50 text-blue-700 border-blue-200',
+        'inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full border bg-blue-50 text-blue-700 border-blue-200 whitespace-nowrap',
         className
       )}
     >

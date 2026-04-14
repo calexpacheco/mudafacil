@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/nextjs'
+import { IconCheck, IconX, IconAlertTriangle, IconConfetti, IconStar, IconTruckDelivery, IconShield, IconLock } from '@tabler/icons-react'
 
 const meta: Meta = {
   title: 'UI/Badge',
@@ -28,16 +29,16 @@ export const AllVariants: StoryObj = {
           <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-4">Status</h3>
           <div className="flex flex-wrap gap-3">
             <span className="inline-flex items-center gap-1 text-xs px-2.5 py-1 rounded-full bg-green-100 text-green-700 font-medium">
-              ✓ Ativo
+              <IconCheck size={12} stroke={2} /> Ativo
             </span>
             <span className="inline-flex items-center gap-1 text-xs px-2.5 py-1 rounded-full bg-red-100 text-red-700 font-medium">
-              ✗ Inativo
+              <IconX size={12} stroke={2} /> Inativo
             </span>
             <span className="inline-flex items-center gap-1 text-xs px-2.5 py-1 rounded-full bg-amber-100 text-amber-700 font-medium">
-              ⚠ Pendente
+              <IconAlertTriangle size={12} stroke={1.5} /> Pendente
             </span>
             <span className="inline-flex items-center gap-1 text-xs px-2.5 py-1 rounded-full bg-blue-100 text-blue-700 font-medium">
-              ℹ Em andamento
+              Em andamento
             </span>
             <span className="inline-flex items-center gap-1 text-xs px-2.5 py-1 rounded-full bg-gray-100 text-gray-600 font-medium">
               — Rascunho
@@ -53,10 +54,10 @@ export const AllVariants: StoryObj = {
               FREE
             </span>
             <span className="inline-flex items-center gap-1 text-xs px-2.5 py-1 rounded-full bg-amber-100 text-amber-700 font-semibold">
-              🎉 TRIAL
+              <IconConfetti size={12} stroke={1.5} /> TRIAL
             </span>
             <span className="inline-flex items-center gap-1 text-xs px-2.5 py-1 rounded-full bg-blue-600 text-white font-semibold">
-              ⭐ PRO
+              <IconStar size={12} stroke={1.5} /> PRO
             </span>
           </div>
         </section>
@@ -66,16 +67,16 @@ export const AllVariants: StoryObj = {
           <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-4">Card Cotação (com ícone)</h3>
           <div className="flex flex-wrap gap-2">
             <span className="inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full border bg-blue-50 text-blue-700 border-blue-200">
-              🚚 HR / Sprinter
+              <IconTruckDelivery size={12} stroke={1.5} /> HR / Sprinter
             </span>
             <span className="inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full border bg-blue-50 text-blue-700 border-blue-200">
-              📅 Disponível 15 abr
+              Disponível 15 abr
             </span>
             <span className="inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full border bg-green-50 text-green-700 border-green-200">
-              🛡️ Seguro incluso
+              <IconShield size={12} stroke={1.5} /> Seguro incluso
             </span>
             <span className="inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full border bg-gray-50 text-gray-600 border-gray-200">
-              ⏳ Válido até 20 abr
+              Válido até 20 abr
             </span>
           </div>
         </section>
@@ -85,17 +86,17 @@ export const AllVariants: StoryObj = {
           <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-4">Tipo de Caminhão</h3>
           <div className="flex flex-wrap gap-2">
             {[
-              { label: '🚐 Fiorino', color: '#6366f1' },
-              { label: '🚐 HR / Sprinter', color: '#8b5cf6' },
-              { label: '🚛 3/4 Truck', color: '#2563EB' },
-              { label: '🚚 Baú', color: '#0f172a' },
-            ].map(({ label, color }) => (
+              { label: 'Fiorino', icon: <IconTruckDelivery size={12} stroke={1.5} />, color: '#6366f1' },
+              { label: 'HR / Sprinter', icon: <IconTruckDelivery size={12} stroke={1.5} />, color: '#8b5cf6' },
+              { label: '3/4 Truck', icon: <IconTruckDelivery size={12} stroke={1.5} />, color: '#E83500' },
+              { label: 'Baú', icon: <IconTruckDelivery size={12} stroke={1.5} />, color: '#0f172a' },
+            ].map(({ label, icon, color }) => (
               <span
                 key={label}
                 className="inline-flex items-center gap-1 text-xs px-2.5 py-1 rounded-full font-medium text-white"
                 style={{ backgroundColor: color }}
               >
-                {label}
+                {icon} {label}
               </span>
             ))}
           </div>
@@ -106,10 +107,10 @@ export const AllVariants: StoryObj = {
           <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-4">Paywall / Lock</h3>
           <div className="flex flex-wrap gap-2">
             <span className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg bg-amber-50 text-amber-700 border border-amber-200 font-medium">
-              🔒 Filtros avançados disponíveis no Trial ou PRO
+              <IconLock size={12} stroke={1.5} /> Filtros avançados disponíveis no Trial ou PRO
             </span>
             <span className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg bg-blue-50 text-blue-700 border border-dashed border-blue-200 font-medium">
-              🔒 Recurso PRO
+              <IconLock size={12} stroke={1.5} /> Recurso PRO
             </span>
           </div>
         </section>
@@ -170,11 +171,11 @@ export const SaveStatus: StoryObj = {
         </p>
         <div className="flex gap-6 items-center">
           <div className="flex flex-col items-center gap-2">
-            <span className="text-xs text-gray-400">✅ Salvo</span>
+            <span className="text-xs text-gray-400 flex items-center gap-1"><IconCheck size={12} stroke={2} className="text-green-500" /> Salvo</span>
             <p className="text-xs text-gray-400">Estado: saved</p>
           </div>
           <div className="flex flex-col items-center gap-2">
-            <span className="text-xs text-gray-400">⏳ Salvando...</span>
+            <span className="text-xs text-gray-400 flex items-center gap-1"><span className="w-3 h-3 border-2 border-gray-400 border-t-transparent rounded-full animate-spin inline-block" /> Salvando...</span>
             <p className="text-xs text-gray-400">Estado: saving</p>
           </div>
           <div className="flex flex-col items-center gap-2">

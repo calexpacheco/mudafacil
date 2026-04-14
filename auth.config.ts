@@ -12,15 +12,22 @@ export const authConfig: NextAuthConfig = {
   callbacks: {
     authorized({ auth, request: { nextUrl } }) {
       const isLoggedIn = !!auth?.user
+      const pathname = nextUrl.pathname
+
+      // Nunca bloqueia rotas de callback do OAuth
+      if (pathname.startsWith('/api/auth')) return true
+
       const protectedRoutes = ['/dashboard', '/app', '/settings']
       const isProtected = protectedRoutes.some((route) =>
-        nextUrl.pathname.startsWith(route)
+        pathname.startsWith(route)
       )
+
       if (isProtected && !isLoggedIn) {
         const loginUrl = new URL('/login', nextUrl)
-        loginUrl.searchParams.set('callbackUrl', nextUrl.pathname)
+        loginUrl.searchParams.set('callbackUrl', pathname)
         return Response.redirect(loginUrl)
       }
+
       return true
     },
   },

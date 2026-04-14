@@ -2,6 +2,7 @@
 
 import type { FiltrosCotacao } from '@/types/mudafacil'
 import { cn } from '@/design-system/utils'
+import { IconCurrencyDollar, IconStar, IconCalendar, IconLock } from '@tabler/icons-react'
 
 interface FiltrosCotacaoProps {
   filtros: FiltrosCotacao
@@ -21,27 +22,32 @@ export function FiltrosCotacaoPainel({ filtros, onChange, filtrosAvancados }: Fi
       {/* Ordenação — disponível para todos */}
       <div>
         <label className="text-xs text-gray-500 font-medium mb-1 block">Ordenar por</label>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           {(['preco', 'nota', 'data'] as const).map((op) => (
             <button
               key={op}
               onClick={() => update({ ordenarPor: op })}
               className={cn(
-                'text-xs px-3 py-1.5 rounded-full font-medium transition-colors',
+                'text-xs px-3 py-1.5 rounded-full font-medium transition-colors cursor-pointer',
                 filtros.ordenarPor === op
-                  ? 'bg-blue-600 text-white'
+                  ? 'bg-[#E83500] text-white'
                   : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
               )}
             >
-              {op === 'preco' ? '💰 Menor preço' : op === 'nota' ? '⭐ Melhor nota' : '📅 Disponível'}
+              {op === 'preco'
+                ? <span className="flex items-center gap-1"><IconCurrencyDollar size={12} stroke={1.5} /> Menor preço</span>
+                : op === 'nota'
+                  ? <span className="flex items-center gap-1"><IconStar size={12} stroke={1.5} /> Melhor nota</span>
+                  : <span className="flex items-center gap-1"><IconCalendar size={12} stroke={1.5} /> Disponível</span>}
             </button>
           ))}
         </div>
       </div>
 
       {!filtrosAvancados && (
-        <div className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-xs text-amber-700">
-          🔒 Filtros avançados disponíveis no Trial ou PRO
+        <div className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-xs text-amber-700 flex items-center gap-1.5">
+          <IconLock size={14} stroke={1.5} className="text-amber-700 flex-shrink-0" />
+          Filtros avançados disponíveis no Trial ou PRO
         </div>
       )}
 
@@ -59,7 +65,8 @@ export function FiltrosCotacaoPainel({ filtros, onChange, filtrosAvancados }: Fi
               step={100}
               value={filtros.precoMax ?? 5000}
               onChange={(e) => update({ precoMax: Number(e.target.value) || undefined })}
-              className="w-full accent-blue-600"
+              className="w-full cursor-pointer"
+              style={{ accentColor: '#E83500' }}
             />
           </div>
 
@@ -75,7 +82,8 @@ export function FiltrosCotacaoPainel({ filtros, onChange, filtrosAvancados }: Fi
               step={0.5}
               value={filtros.notaMin ?? 0}
               onChange={(e) => update({ notaMin: Number(e.target.value) || undefined })}
-              className="w-full accent-blue-600"
+              className="w-full cursor-pointer"
+              style={{ accentColor: '#E83500' }}
             />
           </div>
 
@@ -85,7 +93,8 @@ export function FiltrosCotacaoPainel({ filtros, onChange, filtrosAvancados }: Fi
               type="checkbox"
               checked={filtros.seguroIncluso ?? false}
               onChange={(e) => update({ seguroIncluso: e.target.checked || undefined })}
-              className="rounded accent-blue-600"
+              className="rounded"
+              style={{ accentColor: '#E83500' }}
             />
             Seguro incluso
           </label>
@@ -99,9 +108,9 @@ export function FiltrosCotacaoPainel({ filtros, onChange, filtrosAvancados }: Fi
                   key={tipo ?? 'todos'}
                   onClick={() => update({ tipoCaminhao: tipo as FiltrosCotacao['tipoCaminhao'] })}
                   className={cn(
-                    'text-xs px-2.5 py-1 rounded-full font-medium transition-colors',
+                    'text-xs px-2.5 py-1 rounded-full font-medium transition-colors cursor-pointer',
                     filtros.tipoCaminhao === tipo
-                      ? 'bg-blue-600 text-white'
+                      ? 'bg-[#E83500] text-white'
                       : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                   )}
                 >
@@ -113,7 +122,7 @@ export function FiltrosCotacaoPainel({ filtros, onChange, filtrosAvancados }: Fi
 
           <button
             onClick={() => onChange({ ordenarPor: 'preco' })}
-            className="text-xs text-gray-400 underline text-left hover:text-gray-600"
+            className="text-xs text-gray-400 underline text-left hover:text-gray-600 cursor-pointer"
           >
             Limpar filtros
           </button>

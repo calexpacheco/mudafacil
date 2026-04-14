@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/nextjs'
+import { IconCheck, IconX, IconAlertTriangle, IconInfoCircle, IconBulb, IconLock, IconPackage, IconSearch, IconTruck, IconArrowRight, IconConfetti, IconPlus } from '@tabler/icons-react'
 
 const meta: Meta = {
   title: 'UI/Feedback',
@@ -25,7 +26,7 @@ export const Alerts: StoryObj = {
         <div className="flex flex-col gap-4">
           {/* Success */}
           <div className="rounded-lg bg-green-50 border border-green-200 p-4 flex items-start gap-3">
-            <span className="text-green-500 text-lg">✅</span>
+            <IconCheck size={20} stroke={2} className="text-green-500 flex-shrink-0 mt-0.5" />
             <div>
               <p className="text-sm font-semibold text-green-800">Mudança salva com sucesso!</p>
               <p className="text-xs text-green-600 mt-0.5">Todos os itens foram persistidos no banco de dados.</p>
@@ -34,7 +35,7 @@ export const Alerts: StoryObj = {
 
           {/* Error */}
           <div className="rounded-lg bg-red-50 border border-red-200 p-4 flex items-start gap-3">
-            <span className="text-red-500 text-lg">❌</span>
+            <IconX size={20} stroke={2} className="text-red-500 flex-shrink-0 mt-0.5" />
             <div>
               <p className="text-sm font-semibold text-red-800">Erro ao salvar</p>
               <p className="text-xs text-red-600 mt-0.5">Não foi possível conectar ao servidor. Tente novamente.</p>
@@ -43,7 +44,7 @@ export const Alerts: StoryObj = {
 
           {/* Warning */}
           <div className="rounded-lg bg-amber-50 border border-amber-200 p-4 flex items-start gap-3">
-            <span className="text-amber-500 text-lg">⚠️</span>
+            <IconAlertTriangle size={20} stroke={1.5} className="text-amber-500 flex-shrink-0 mt-0.5" />
             <div>
               <p className="text-sm font-semibold text-amber-800">Carga acima da capacidade!</p>
               <p className="text-xs text-amber-600 mt-0.5">Considere um caminhão maior ou remova alguns itens.</p>
@@ -52,7 +53,7 @@ export const Alerts: StoryObj = {
 
           {/* Info */}
           <div className="rounded-lg bg-blue-50 border border-blue-200 p-4 flex items-start gap-3">
-            <span className="text-blue-500 text-lg">ℹ️</span>
+            <IconInfoCircle size={20} stroke={1.5} className="text-blue-500 flex-shrink-0 mt-0.5" />
             <div>
               <p className="text-sm font-semibold text-blue-800">Dica de otimização</p>
               <p className="text-xs text-blue-600 mt-0.5">O caminhão está subutilizado. Você pode economizar com um modelo menor.</p>
@@ -61,7 +62,7 @@ export const Alerts: StoryObj = {
 
           {/* Neutral */}
           <div className="rounded-lg bg-gray-50 border border-gray-200 p-4 flex items-start gap-3">
-            <span className="text-gray-400 text-lg">💡</span>
+            <IconBulb size={20} stroke={1.5} className="text-gray-400 flex-shrink-0 mt-0.5" />
             <div>
               <p className="text-sm font-semibold text-gray-700">Como funciona</p>
               <p className="text-xs text-gray-500 mt-0.5">Arraste itens do catálogo para o canvas para montar sua mudança.</p>
@@ -95,7 +96,7 @@ export const InlineErrors: StoryObj = {
               className="px-3 py-2 rounded-lg border border-red-400 bg-red-50 text-sm text-gray-900 outline-none ring-2 ring-red-200"
             />
             <p className="text-xs text-red-600 flex items-center gap-1">
-              <span>⚠</span> E-mail inválido. Use o formato nome@exemplo.com
+              <IconAlertTriangle size={14} stroke={1.5} /> E-mail inválido. Use o formato nome@exemplo.com
             </p>
           </div>
 
@@ -118,7 +119,7 @@ export const InlineErrors: StoryObj = {
                 defaultValue="carlos@mudafacil.com"
                 className="w-full px-3 py-2 rounded-lg border border-green-400 bg-green-50 text-sm text-gray-900 outline-none"
               />
-              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-green-500">✓</span>
+              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-green-500"><IconCheck size={16} stroke={2} /></span>
             </div>
             <p className="text-xs text-green-600">E-mail verificado</p>
           </div>
@@ -142,30 +143,30 @@ export const CanvasWarnings: StoryObj = {
 
         <div className="flex flex-col gap-4">
           {/* Acima da capacidade */}
-          <div className="rounded-lg bg-red-50 border border-red-200 p-3 text-xs text-red-700 font-medium">
-            ⚠️ Carga acima da capacidade! Considere um caminhão maior.
+          <div className="rounded-lg bg-red-50 border border-red-200 p-3 text-xs text-red-700 font-medium flex items-center gap-1.5">
+            <IconAlertTriangle size={14} stroke={1.5} /> Carga acima da capacidade! Considere um caminhão maior.
           </div>
 
           {/* Caminhão subutilizado */}
-          <div className="rounded-lg bg-amber-50 border border-amber-200 p-3 text-xs text-amber-700">
-            💡 O caminhão está subutilizado. Você pode economizar com um modelo menor.
+          <div className="rounded-lg bg-amber-50 border border-amber-200 p-3 text-xs text-amber-700 flex items-center gap-1.5">
+            <IconBulb size={14} stroke={1.5} /> O caminhão está subutilizado. Você pode economizar com um modelo menor.
           </div>
 
           {/* Limite de itens atingido */}
-          <div className="rounded-lg bg-orange-50 border border-orange-200 p-3 text-xs text-orange-700 font-medium">
-            🔒 Limite de {5} itens no plano FREE. Assine PRO para adicionar sem limite.
+          <div className="rounded-lg bg-orange-50 border border-orange-200 p-3 text-xs text-orange-700 font-medium flex items-center gap-1.5">
+            <IconLock size={14} stroke={1.5} /> Limite de {5} itens no plano FREE. Assine PRO para adicionar sem limite.
           </div>
 
           {/* Canvas vazio */}
           <div className="flex flex-col items-center justify-center py-8 text-center border-2 border-dashed border-gray-200 rounded-xl">
-            <span className="text-3xl mb-2">📦</span>
+            <IconPackage size={32} stroke={1.5} className="text-gray-400 mb-2" />
             <p className="text-sm font-medium text-gray-500">Canvas vazio</p>
             <p className="text-xs text-gray-400 mt-1">Arraste itens do catálogo para começar</p>
           </div>
 
           {/* Nenhuma cotação */}
           <div className="flex flex-col items-center justify-center py-8 text-center">
-            <p className="text-2xl mb-2">🔍</p>
+            <IconSearch size={32} stroke={1.5} className="text-gray-400 mb-2" />
             <p className="text-sm text-gray-400">Nenhuma cotação encontrada com esses filtros</p>
           </div>
         </div>
@@ -182,17 +183,17 @@ export const TrialBanners: StoryObj = {
     <div className="flex flex-col gap-4">
       {/* Trial ativo com muitos dias */}
       <div className="flex items-center justify-between px-4 py-2 text-sm font-medium bg-amber-500 text-white">
-        <span>🎉 Trial ativo — 11 dias restantes de acesso completo</span>
-        <a href="#" className="ml-4 text-xs px-3 py-1 rounded-full bg-white/20 hover:bg-white/30 transition-colors whitespace-nowrap">
-          Assinar PRO →
+        <span className="flex items-center gap-1.5"><IconConfetti size={16} stroke={1.5} /> Trial ativo — 11 dias restantes de acesso completo</span>
+        <a href="#" className="ml-4 text-xs px-3 py-1 rounded-full bg-white/20 hover:bg-white/30 transition-colors whitespace-nowrap flex items-center gap-1">
+          Assinar PRO <IconArrowRight size={14} stroke={1.5} />
         </a>
       </div>
 
       {/* Trial expirando */}
       <div className="flex items-center justify-between px-4 py-2 text-sm font-medium bg-red-600 text-white">
-        <span>⚠️ Seu trial expira em 2 dias!</span>
-        <a href="#" className="ml-4 text-xs px-3 py-1 rounded-full bg-white/20 hover:bg-white/30 transition-colors whitespace-nowrap">
-          Assinar PRO →
+        <span className="flex items-center gap-1.5"><IconAlertTriangle size={16} stroke={1.5} /> Seu trial expira em 2 dias!</span>
+        <a href="#" className="ml-4 text-xs px-3 py-1 rounded-full bg-white/20 hover:bg-white/30 transition-colors whitespace-nowrap flex items-center gap-1">
+          Assinar PRO <IconArrowRight size={14} stroke={1.5} />
         </a>
       </div>
 
@@ -278,25 +279,25 @@ export const EmptyStates: StoryObj = {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {/* Canvas vazio */}
           <div className="flex flex-col items-center justify-center py-12 px-6 text-center border-2 border-dashed border-gray-200 rounded-xl bg-gray-50">
-            <span className="text-4xl mb-3">📦</span>
+            <IconPackage size={48} stroke={1.5} className="text-gray-400 mb-3" />
             <p className="text-sm font-semibold text-gray-700">Nenhum item no canvas</p>
             <p className="text-xs text-gray-400 mt-1">Arraste itens do catálogo para começar a montar sua mudança</p>
           </div>
 
           {/* Cotações vazias */}
           <div className="flex flex-col items-center justify-center py-12 px-6 text-center rounded-xl bg-gray-50">
-            <span className="text-4xl mb-3">🔍</span>
+            <IconSearch size={48} stroke={1.5} className="text-gray-400 mb-3" />
             <p className="text-sm font-semibold text-gray-700">Nenhuma cotação</p>
             <p className="text-xs text-gray-400 mt-1">Nenhuma cotação encontrada com esses filtros</p>
           </div>
 
           {/* Mudanças vazias */}
           <div className="flex flex-col items-center justify-center py-12 px-6 text-center border-2 border-dashed border-blue-200 rounded-xl bg-blue-50">
-            <span className="text-4xl mb-3">🚛</span>
+            <IconTruck size={48} stroke={1.5} className="text-blue-400 mb-3" />
             <p className="text-sm font-semibold text-gray-700">Nenhuma mudança criada</p>
             <p className="text-xs text-gray-500 mt-1 mb-4">Crie sua primeira mudança e comece a planejar</p>
-            <button className="px-4 py-2 rounded-lg bg-blue-600 text-white text-xs font-semibold hover:bg-blue-700 transition-colors">
-              + Nova Mudança
+            <button className="px-4 py-2 rounded-lg bg-blue-600 text-white text-xs font-semibold hover:bg-blue-700 transition-colors flex items-center gap-1">
+              <IconPlus size={12} stroke={2} /> Nova Mudança
             </button>
           </div>
         </div>

@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/nextjs'
 import { PaywallGate, TrialBanner } from '@/components/paywall/PaywallGate'
+import { IconCheck, IconStar, IconChartBar } from '@tabler/icons-react'
 
 const meta: Meta = {
   title: 'Components/Paywall',
@@ -110,7 +111,7 @@ export const LiberadoTrial: StoryObj = {
           }}
         >
           <div className="p-4 bg-white rounded-xl border border-gray-200">
-            <p className="text-sm font-semibold text-gray-900">✅ Conteúdo PRO desbloqueado</p>
+            <p className="text-sm font-semibold text-gray-900 flex items-center gap-1.5"><IconCheck size={16} stroke={2} className="text-[#E83500]" /> Conteúdo PRO desbloqueado</p>
             <p className="text-xs text-gray-500 mt-1">Filtros avançados, sem limite de itens, etc.</p>
           </div>
         </PaywallGate>
@@ -135,7 +136,7 @@ export const LiberadoPro: StoryObj = {
           }}
         >
           <div className="p-4 bg-white rounded-xl border border-gray-200">
-            <p className="text-sm font-semibold text-gray-900">⭐ Assinante PRO</p>
+            <p className="text-sm font-semibold text-gray-900 flex items-center gap-1.5"><IconStar size={16} stroke={1.5} className="text-[#E83500]" /> Assinante PRO</p>
             <p className="text-xs text-gray-500 mt-1">Acesso completo a todos os recursos.</p>
           </div>
         </PaywallGate>
@@ -151,7 +152,7 @@ export const ComparativoPlanos: StoryObj = {
   render: () => {
     const feature = (
       <div className="p-4 bg-white rounded-xl border border-gray-200">
-        <p className="text-sm font-semibold text-gray-900">📊 Relatório de Mudança</p>
+        <p className="text-sm font-semibold text-gray-900 flex items-center gap-1.5"><IconChartBar size={16} stroke={1.5} className="text-gray-700" /> Relatório de Mudança</p>
         <p className="text-xs text-gray-500 mt-1">PDF com resumo completo da sua mudança</p>
       </div>
     )

@@ -5,12 +5,36 @@ import { useDraggable } from '@dnd-kit/core'
 import { CATALOGO_ITENS, CATEGORIAS, CATEGORIA_LABELS } from '@/lib/catalogo-itens'
 import type { ItemCatalogo } from '@/types/mudafacil'
 import { cn } from '@/design-system/utils'
+import { IconBed, IconToolsKitchen2, IconSofa, IconDeviceLaptop, IconPackage, IconPlus } from '@tabler/icons-react'
 
-function ItemCatalogoCard({ item }: { item: ItemCatalogo }) {
+function CategoryIcon({ categoria, className }: { categoria: string; className?: string }) {
+  const icons: Record<string, React.ReactNode> = {
+    quarto:     <IconBed size={18} stroke={1.5} className={className} />,
+    cozinha:    <IconToolsKitchen2 size={18} stroke={1.5} className={className} />,
+    sala:       <IconSofa size={18} stroke={1.5} className={className} />,
+    escritorio: <IconDeviceLaptop size={18} stroke={1.5} className={className} />,
+    caixa:      <IconPackage size={18} stroke={1.5} className={className} />,
+  }
+  return <>{icons[categoria] ?? <IconPackage size={18} stroke={1.5} className={className} />}</>
+}
+
+function ItemCatalogoCard({
+  item,
+  onAdd,
+}: {
+  item: ItemCatalogo
+  onAdd?: (item: ItemCatalogo) => void
+}) {
   const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
     id: `catalog-${item.id}`,
     data: { type: 'catalog-item', item },
   })
+
+  function handleAdd(e: React.MouseEvent) {
+    e.stopPropagation()
+    if (!onAdd) return
+    onAdd(item)
+  }
 
   return (
     <div
@@ -18,31 +42,38 @@ function ItemCatalogoCard({ item }: { item: ItemCatalogo }) {
       {...attributes}
       {...listeners}
       className={cn(
-        'flex flex-col items-center gap-1 p-2 rounded-lg border border-gray-200 bg-white cursor-grab',
-        'hover:border-blue-400 hover:shadow-sm transition-all text-center select-none',
+        'relative flex flex-col items-center gap-1 p-2 rounded-lg border border-gray-200 bg-white',
+        'hover:border-[#FA9370] hover:shadow-sm transition-all text-center select-none',
+        'cursor-grab active:cursor-grabbing',
         isDragging && 'opacity-30 scale-95'
       )}
       title={`${item.nome} — ${item.volumeM3.toFixed(3)} m³ · ${item.pesoKg}kg`}
     >
-      <span className="text-xl">{getEmoji(item.categoria)}</span>
+      <CategoryIcon categoria={item.categoria} className="text-gray-700" />
       <span className="text-[10px] font-medium text-gray-700 leading-tight line-clamp-2">{item.nome}</span>
       <span className="text-[9px] text-gray-400">{item.volumeM3.toFixed(2)}m³</span>
+
+      {/* Botão + — canto inferior direito dentro do card */}
+      {onAdd && (
+        <button
+          onPointerDown={(e) => e.stopPropagation()}
+          onClick={handleAdd}
+          className="absolute bottom-1 right-1 w-4 h-4 rounded-full bg-gray-700 hover:bg-gray-900 active:scale-90 flex items-center justify-center cursor-pointer transition-all"
+          aria-label={`Adicionar ${item.nome}`}
+        >
+          <IconPlus size={9} stroke={2.5} className="text-white" />
+        </button>
+      )}
     </div>
   )
 }
 
-function getEmoji(cat: string) {
-  const map: Record<string, string> = {
-    quarto: '🛏️', cozinha: '🍳', sala: '🛋️', escritorio: '💻', caixa: '📦',
-  }
-  return map[cat] ?? '📦'
-}
-
 interface CatalogoPainelProps {
   busca?: string
+  onAdd?: (item: ItemCatalogo) => void
 }
 
-export function CatalogoPainel({ busca = '' }: CatalogoPainelProps) {
+export function CatalogoPainel({ busca = '', onAdd }: CatalogoPainelProps) {
   const [categoriaSelecionada, setCategoriaSelecionada] = useState<string>('todos')
   const [buscaLocal, setBuscaLocal] = useState(busca)
 
@@ -60,7 +91,7 @@ export function CatalogoPainel({ busca = '' }: CatalogoPainelProps) {
         placeholder="Buscar item..."
         value={buscaLocal}
         onChange={(e) => setBuscaLocal(e.target.value)}
-        className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+        className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#E83500] focus:border-[#E83500]"
       />
 
       {/* Filtro por categoria */}
@@ -68,9 +99,9 @@ export function CatalogoPainel({ busca = '' }: CatalogoPainelProps) {
         <button
           onClick={() => setCategoriaSelecionada('todos')}
           className={cn(
-            'text-xs px-2.5 py-1 rounded-full font-medium transition-colors',
+            'text-xs px-2.5 py-1 rounded-full font-medium transition-colors cursor-pointer',
             categoriaSelecionada === 'todos'
-              ? 'bg-blue-600 text-white'
+              ? 'bg-[#E83500] text-white'
               : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
           )}
         >
@@ -81,9 +112,9 @@ export function CatalogoPainel({ busca = '' }: CatalogoPainelProps) {
             key={cat}
             onClick={() => setCategoriaSelecionada(cat)}
             className={cn(
-              'text-xs px-2.5 py-1 rounded-full font-medium transition-colors',
+              'text-xs px-2.5 py-1 rounded-full font-medium transition-colors cursor-pointer',
               categoriaSelecionada === cat
-                ? 'bg-blue-600 text-white'
+                ? 'bg-[#E83500] text-white'
                 : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
             )}
           >
@@ -93,13 +124,13 @@ export function CatalogoPainel({ busca = '' }: CatalogoPainelProps) {
       </div>
 
       <p className="text-xs text-gray-400">
-        {itensFiltrados.length} itens · arraste para o canvas
+        {itensFiltrados.length} {onAdd ? 'itens · toque + para adicionar' : 'itens · arraste para a lista'}
       </p>
 
       {/* Grid de itens */}
-      <div className="grid grid-cols-3 gap-2 overflow-y-auto max-h-[500px] pr-1">
+      <div className="grid gap-2 overflow-y-auto max-h-[500px] pr-1 pt-2" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(80px, 1fr))' }}>
         {itensFiltrados.map((item) => (
-          <ItemCatalogoCard key={item.id} item={item} />
+          <ItemCatalogoCard key={item.id} item={item} onAdd={onAdd} />
         ))}
       </div>
     </div>

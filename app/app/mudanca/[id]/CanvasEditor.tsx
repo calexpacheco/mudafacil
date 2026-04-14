@@ -1,16 +1,190 @@
 'use client'
 
-import { useState, useCallback, useEffect, useRef } from 'react'
-import { DndContext, PointerSensor, useSensor, useSensors, type DragEndEvent } from '@dnd-kit/core'
-import { CanvasCarga } from '@/components/canvas/CanvasCarga'
-import { ResumoCanvasPanel } from '@/components/canvas/ResumoCanvas'
+import { useState, useCallback, useEffect, useRef, useMemo } from 'react'
+import { DndContext, DragOverlay, PointerSensor, useSensor, useSensors, type DragEndEvent, type DragStartEvent } from '@dnd-kit/core'
+import { ListaItensCanvas } from '@/components/canvas/ListaItensCanvas'
+import { ResumoBar } from '@/components/canvas/ResumoCanvas'
 import { SeletorCaminhao } from '@/components/canvas/SeletorCaminhao'
 import { CatalogoPainel } from '@/components/catalog/CatalogoPainel'
 import { FiltrosCotacaoPainel } from '@/components/cotacoes/FiltrosCotacao'
 import { CardCotacao } from '@/components/cotacoes/CardCotacao'
 import { CAMINHOES } from '@/lib/caminhoes'
 import { PLAN_LIMITS } from '@/lib/plan-limits'
-import type { CaminhaoInfo, ItemPositionado, FiltrosCotacao, CotacaoCard } from '@/types/mudafacil'
+import type { CaminhaoInfo, ItemCatalogo, ItemPositionado, FiltrosCotacao, CotacaoCard } from '@/types/mudafacil'
+import { IconTruck, IconBooks, IconPackage, IconSearch, IconCheck, IconAlertTriangle, IconChevronDown, IconAdjustments, IconPlus, IconTrash } from '@tabler/icons-react'
+import { toast } from 'sonner'
+import { NovaMudancaModal } from '@/components/ui/NovaMudancaModal'
+import { useRouter } from 'next/navigation'
+import { createPortal } from 'react-dom'
+
+// ─── Preço dinâmico das cotações ─────────────────────────────────────────────
+// Ajusta o preço base de cada cotação conforme volume atual, nº de caminhões e urgência.
+
+function calcularPrecoDinamico(
+  precoBase: number,
+  volumeTotal: number,
+  caminhao: CaminhaoInfo,
+  quantidadeCaminhoes: number,
+  dataDesejada: string | null,
+): number {
+  if (volumeTotal === 0) return Math.round(precoBase * 0.3)
+
+  // Quantos caminhões desse tipo seriam necessários
+  const qtdNecessaria = Math.max(1, Math.ceil(volumeTotal / caminhao.capacidadeM3))
+  const qtdEfetiva = Math.max(qtdNecessaria, quantidadeCaminhoes)
+
+  // Fator de ocupação do último caminhão (evita cobrar 100% por 1% de uso)
+  const volUltimoCaminhao = volumeTotal - (qtdEfetiva - 1) * caminhao.capacidadeM3
+  const ocupacaoUltimo = Math.min(1, Math.max(0.35, volUltimoCaminhao / caminhao.capacidadeM3))
+  const fatorVolume = (qtdEfetiva - 1) + ocupacaoUltimo
+
+  // Fator urgência baseado em dias até a data
+  let fatorUrgencia = 1.0
+  if (dataDesejada) {
+    const dias = Math.max(0, (new Date(dataDesejada).getTime() - Date.now()) / 86_400_000)
+    if (dias < 3)       fatorUrgencia = 1.30
+    else if (dias < 7)  fatorUrgencia = 1.15
+    else if (dias < 14) fatorUrgencia = 1.05
+    else if (dias > 30) fatorUrgencia = 0.97
+  }
+
+  return Math.round(precoBase * fatorVolume * fatorUrgencia)
+}
+
+// ─── Preview visual do item sendo arrastado ──────────────────────────────────
+
+const CATEGORIA_COR: Record<string, string> = {
+  quarto:     'bg-violet-500',
+  cozinha:    'bg-orange-500',
+  sala:       'bg-emerald-500',
+  escritorio: 'bg-blue-500',
+  caixa:      'bg-amber-400',
+}
+
+const CATEGORIA_LABEL: Record<string, string> = {
+  quarto: 'Quarto', cozinha: 'Cozinha', sala: 'Sala', escritorio: 'Escritório', caixa: 'Caixas',
+}
+
+function DragPreviewCard({ item }: { item: ItemCatalogo }) {
+  const cor = CATEGORIA_COR[item.categoria] ?? 'bg-gray-400'
+  const cat = CATEGORIA_LABEL[item.categoria] ?? item.categoria
+  return (
+    <div className="flex items-center gap-3 px-4 py-3 bg-white rounded-xl border-2 border-blue-400 shadow-2xl w-72 cursor-grabbing rotate-2 opacity-95">
+      <div className={`w-9 h-9 rounded-full flex-shrink-0 flex items-center justify-center font-bold text-sm text-white ${cor}`}>
+        {item.nome.charAt(0).toUpperCase()}
+      </div>
+      <div className="flex-1 min-w-0">
+        <p className="text-sm font-semibold text-gray-900 truncate">{item.nome}</p>
+        <p className="text-xs text-gray-400">
+          {cat} · {item.volumeM3.toFixed(2)} m³ · {item.pesoKg} kg
+        </p>
+      </div>
+    </div>
+  )
+}
+
+// ─── Banner de empresa contratada ────────────────────────────────────────────
+
+interface CotacaoContratadaInfo {
+  nomeTransportadora: string
+  precoCentavos: number          // preço original contratado
+  precoAtualCentavos?: number    // preço estimado com condições atuais
+  dataDisponivel: string | null
+  nomeVeiculo: string | null
+  tipoVeiculo: string | null
+  seguroIncluso: boolean
+}
+
+// Truck sizes by vehicle type
+const VEICULO_TAMANHO: Record<string, number> = {
+  FIORINO: 20, HR: 22, TRES_QUARTOS: 24, BAU: 26,
+}
+
+function EmpresaContratadaBanner({ info, onAceitarPreco }: { info: CotacaoContratadaInfo; onAceitarPreco?: (novoPreco: number) => void }) {
+  const fmt = (c: number) =>
+    new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(c / 100)
+
+  const precoAtual = info.precoAtualCentavos
+  const diff = precoAtual !== undefined ? precoAtual - info.precoCentavos : 0
+  const diffPct = info.precoCentavos > 0 ? Math.round((diff / info.precoCentavos) * 100) : 0
+  const condicoesAlteradas = Math.abs(diffPct) >= 5
+
+  const dataFmt = info.dataDisponivel
+    ? new Date(info.dataDisponivel).toLocaleDateString('pt-BR', {
+        weekday: 'long', day: '2-digit', month: 'long', year: 'numeric',
+      })
+    : null
+
+  const veiculoTamanho = info.tipoVeiculo ? (VEICULO_TAMANHO[info.tipoVeiculo] ?? 24) : 24
+
+  return (
+    <div className="rounded-xl border border-green-200 bg-green-50 px-5 py-4 flex flex-wrap items-center gap-x-8 gap-y-3">
+      {/* Empresa */}
+      <div className="flex items-center gap-3 flex-1 min-w-[180px]">
+        <div className="w-10 h-10 rounded-full bg-green-600 flex items-center justify-center text-white font-bold text-base flex-shrink-0">
+          {info.nomeTransportadora.charAt(0).toUpperCase()}
+        </div>
+        <div>
+          <p className="text-[10px] font-semibold text-green-700 uppercase tracking-wide">Empresa contratada</p>
+          <p className="text-sm font-bold text-gray-900 leading-tight">{info.nomeTransportadora}</p>
+        </div>
+      </div>
+
+      <div className="w-px h-10 bg-green-200 hidden sm:block" />
+
+      {/* Valor */}
+      <div className="flex flex-col">
+        <span className="text-[10px] font-semibold text-green-700 uppercase tracking-wide">Valor contratado</span>
+        <span className="text-lg font-bold text-green-700 leading-tight">{fmt(info.precoCentavos)}</span>
+        {info.seguroIncluso && (
+          <span className="text-[10px] text-green-600 flex items-center gap-0.5">
+            <IconCheck size={10} stroke={2} className="text-green-600" /> Seguro incluso
+          </span>
+        )}
+        {condicoesAlteradas && precoAtual !== undefined && (
+          <span className={`text-[10px] font-semibold flex items-center gap-1 mt-0.5 ${diff > 0 ? 'text-amber-600' : 'text-blue-600'}`}>
+            <IconAlertTriangle size={10} stroke={2} />
+            Estimativa atual: {fmt(precoAtual)} ({diff > 0 ? '+' : ''}{diffPct}%)
+            {onAceitarPreco && (
+              <button
+                onClick={() => onAceitarPreco(precoAtual)}
+                title="Aceitar novo preço estimado"
+                className="ml-1 flex items-center gap-0.5 px-1.5 py-0.5 rounded-md bg-green-100 hover:bg-green-200 text-green-700 text-[10px] font-bold transition-colors cursor-pointer border border-green-300"
+              >
+                <IconCheck size={10} stroke={2.5} /> Aceitar
+              </button>
+            )}
+          </span>
+        )}
+      </div>
+
+      <div className="w-px h-10 bg-green-200 hidden sm:block" />
+
+      {/* Data */}
+      <div className="flex flex-col">
+        <span className="text-[10px] font-semibold text-green-700 uppercase tracking-wide">Data prevista</span>
+        <span className="text-sm font-semibold text-gray-800 leading-tight capitalize">
+          {dataFmt ?? '—'}
+        </span>
+      </div>
+
+      <div className="w-px h-10 bg-green-200 hidden sm:block" />
+
+      {/* Veículo */}
+      <div className="flex items-center gap-2">
+        <IconTruck size={veiculoTamanho} stroke={1.5} className="text-green-700" />
+        <div className="flex flex-col">
+          <span className="text-[10px] font-semibold text-green-700 uppercase tracking-wide">Veículo</span>
+          <span className="text-sm font-semibold text-gray-800 leading-tight">
+            {info.nomeVeiculo ?? '—'}
+          </span>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// ─── Mock de cotações ─────────────────────────────────────────────────────────
 
 const d = (days: number) => new Date(Date.now() + days * 86400000).toISOString()
 
@@ -132,6 +306,41 @@ const COTACOES_MOCK: CotacaoCard[] = [
   },
 ]
 
+// ─── Speed Dial action button ─────────────────────────────────────────────────
+
+function SpeedDialAction({
+  label, icon, open, delay, color, onClick,
+}: {
+  label: string
+  icon: React.ReactNode
+  open: boolean
+  delay: number
+  color: string
+  onClick: () => void
+}) {
+  return (
+    <div
+      className="flex items-center gap-3 justify-end"
+      style={{
+        transition: `opacity 200ms ${delay}ms, transform 200ms ${delay}ms`,
+        opacity: open ? 1 : 0,
+        transform: open ? 'translateY(0) scale(1)' : 'translateY(12px) scale(0.85)',
+        pointerEvents: open ? 'auto' : 'none',
+      }}
+    >
+      <span className="bg-gray-900/80 text-white text-xs font-medium px-2.5 py-1 rounded-lg shadow">
+        {label}
+      </span>
+      <button
+        onClick={onClick}
+        className={`w-12 h-12 rounded-full ${color} text-white shadow-lg flex items-center justify-center active:scale-90 cursor-pointer transition-transform`}
+      >
+        {icon}
+      </button>
+    </div>
+  )
+}
+
 type PlanType = 'FREE' | 'TRIAL' | 'PRO'
 type TabType = 'canvas' | 'cotacoes'
 type ContratarStatus = 'idle' | 'loading' | 'success' | 'error'
@@ -142,13 +351,12 @@ interface CanvasEditorProps {
   layoutInicial: { itensPositionados: unknown; ocupacaoPercentual: number } | null
   plan: PlanType
   filtrosAvancados: boolean
+  dataDesejadaInicial?: string | null
+  cotacaoContratadaInicial?: CotacaoContratadaInfo | null
 }
 
-const CANVAS_WIDTH = 600
-const CANVAS_HEIGHT = 340
-function cmToPx(cm: number) { return Math.max(cm * 1.2, 32) }
 
-export function CanvasEditor({ mudancaId, caminhaoInicial, layoutInicial, plan, filtrosAvancados }: CanvasEditorProps) {
+export function CanvasEditor({ mudancaId, caminhaoInicial, layoutInicial, plan, filtrosAvancados, dataDesejadaInicial = null, cotacaoContratadaInicial = null }: CanvasEditorProps) {
   const [tab, setTab] = useState<TabType>('canvas')
   const [caminhao, setCaminhao] = useState<CaminhaoInfo>(caminhaoInicial)
   const [filtros, setFiltros] = useState<FiltrosCotacao>({ ordenarPor: 'preco' })
@@ -156,43 +364,94 @@ export function CanvasEditor({ mudancaId, caminhaoInicial, layoutInicial, plan, 
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
   const [contratarStatus, setContratarStatus] = useState<Record<string, ContratarStatus>>({})
   const [cotacaoContratadaId, setCotacaoContratadaId] = useState<string | null>(null)
+  // Informações da empresa contratada (populada do servidor ou ao contratar)
+  const [cotacaoInfo, setCotacaoInfo] = useState<CotacaoContratadaInfo | null>(cotacaoContratadaInicial)
 
-  // Carrega layout salvo do banco
+  // Carrega layout salvo do banco — suporta formato antigo (array) e novo ({ items, quantidadeCaminhoes })
   const [itens, setItens] = useState<ItemPositionado[]>(() => {
     if (!layoutInicial?.itensPositionados) return []
     try {
-      return layoutInicial.itensPositionados as ItemPositionado[]
+      const data = layoutInicial.itensPositionados as unknown
+      return Array.isArray(data) ? data : ((data as { items?: ItemPositionado[] }).items ?? [])
     } catch { return [] }
+  })
+
+  // Data desejada para a mudança
+  const [dataDesejada, setDataDesejada] = useState<string>(
+    dataDesejadaInicial
+      ? new Date(dataDesejadaInicial).toISOString().split('T')[0]
+      : ''
+  )
+  const dataSaveTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  const handleDataChange = useCallback((novaData: string) => {
+    setDataDesejada(novaData)
+    if (dataSaveTimer.current) clearTimeout(dataSaveTimer.current)
+    dataSaveTimer.current = setTimeout(async () => {
+      await fetch(`/api/mudancas/${mudancaId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ dataDesejada: novaData || null }),
+      })
+    }, 1000)
+  }, [mudancaId])
+
+  const [quantidadeCaminhoes, setQuantidadeCaminhoes] = useState<number>(() => {
+    if (!layoutInicial?.itensPositionados) return 1
+    try {
+      const data = layoutInicial.itensPositionados as unknown
+      return Array.isArray(data) ? 1 : ((data as { quantidadeCaminhoes?: number }).quantidadeCaminhoes ?? 1)
+    } catch { return 1 }
   })
 
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }))
 
+  // Item sendo arrastado agora (para o DragOverlay)
+  const [activeItem, setActiveItem] = useState<ItemCatalogo | null>(null)
+
+  const handleDragStart = useCallback((event: DragStartEvent) => {
+    const data = event.active.data.current
+    if (data?.type === 'catalog-item') {
+      setActiveItem(data.item as ItemCatalogo)
+    }
+  }, [])
+
+  const handleDragCancel = useCallback(() => {
+    setActiveItem(null)
+  }, [])
+
   const limite = PLAN_LIMITS[plan].itensNoCanvas
   const limiteAtingido = typeof limite === 'number' && isFinite(limite) && itens.length >= limite
 
-  // Calcula ocupação
+  // Volume total (usado em ocupação e pricing)
+  const volumeTotal = itens.reduce((acc, i) => acc + i.item.volumeM3 * (i.quantidade ?? 1), 0)
+
+  // Calcula ocupação (considera quantidade de cada item e número de caminhões)
   const ocupacaoPercentual = Math.min(
-    (itens.reduce((acc, i) => acc + i.item.volumeM3, 0) / caminhao.capacidadeM3) * 100,
+    (volumeTotal / (caminhao.capacidadeM3 * quantidadeCaminhoes)) * 100,
     100
   )
 
   // Auto-save com debounce de 1.5s
-  const saveLayout = useCallback((itensAtual: ItemPositionado[], caminhaoAtual: CaminhaoInfo) => {
+  const saveLayout = useCallback((
+    itensAtual: ItemPositionado[],
+    caminhaoAtual: CaminhaoInfo,
+    qtdCaminhoes: number,
+  ) => {
     if (saveTimer.current) clearTimeout(saveTimer.current)
     setSaveStatus('unsaved')
     saveTimer.current = setTimeout(async () => {
       setSaveStatus('saving')
       try {
+        const volTotal = itensAtual.reduce((acc, i) => acc + i.item.volumeM3 * (i.quantidade ?? 1), 0)
+        const capTotal = caminhaoAtual.capacidadeM3 * qtdCaminhoes
         await fetch(`/api/mudancas/${mudancaId}/layout`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            itensPositionados: itensAtual,
+            itensPositionados: { items: itensAtual, quantidadeCaminhoes: qtdCaminhoes },
             caminhaoId: caminhaoAtual.id,
-            ocupacaoPercentual: Math.min(
-              (itensAtual.reduce((acc, i) => acc + i.item.volumeM3, 0) / caminhaoAtual.capacidadeM3) * 100,
-              100
-            ),
+            ocupacaoPercentual: Math.min((volTotal / capTotal) * 100, 100),
           }),
         })
         setSaveStatus('saved')
@@ -202,57 +461,134 @@ export function CanvasEditor({ mudancaId, caminhaoInicial, layoutInicial, plan, 
     }, 1500)
   }, [mudancaId])
 
+  // ── Seleção automática de veículo ───────────────────────────────────────────
+  // Sempre escolhe o menor veículo que comporta os itens.
+  // Chamado em qualquer mudança de itens (add, remove, quantidade).
+  const autoSelecionarVeiculo = useCallback((
+    novosItens: ItemPositionado[],
+  ): { caminhao: CaminhaoInfo; quantidade: number } => {
+    const volTotal  = novosItens.reduce((acc, i) => acc + i.item.volumeM3 * (i.quantidade ?? 1), 0)
+    const pesoTotal = novosItens.reduce((acc, i) => acc + i.item.pesoKg   * (i.quantidade ?? 1), 0)
+
+    // Canvas vazio → menor veículo
+    if (novosItens.length === 0 || volTotal === 0) {
+      return { caminhao: CAMINHOES[0], quantidade: 1 }
+    }
+
+    // Menor veículo único que comporta tudo
+    for (const c of CAMINHOES) {
+      if (c.capacidadeM3 >= volTotal && c.capacidadeKg >= pesoTotal) {
+        return { caminhao: c, quantidade: 1 }
+      }
+    }
+
+    // Precisa de múltiplos Baú
+    const bau = CAMINHOES[CAMINHOES.length - 1]
+    const qtdNec = Math.ceil(Math.max(volTotal / bau.capacidadeM3, pesoTotal / bau.capacidadeKg))
+    return { caminhao: bau, quantidade: qtdNec }
+  }, [])
+
   const handleRemoveItem = useCallback((uid: string) => {
     setItens((prev) => {
       const next = prev.filter((i) => i.uid !== uid)
-      saveLayout(next, caminhao)
+      const { caminhao: novoCaminhao, quantidade: novaQtd } = autoSelecionarVeiculo(next)
+      setCaminhao(novoCaminhao)
+      setQuantidadeCaminhoes(novaQtd)
+      saveLayout(next, novoCaminhao, novaQtd)
       return next
     })
-  }, [caminhao, saveLayout])
+  }, [autoSelecionarVeiculo, saveLayout])
+
+  const handleQuantidadeChange = useCallback((uid: string, qty: number) => {
+    setItens((prev) => {
+      const next = prev.map((i) => i.uid === uid ? { ...i, quantidade: Math.max(1, qty) } : i)
+      const { caminhao: novoCaminhao, quantidade: novaQtd } = autoSelecionarVeiculo(next)
+      setCaminhao(novoCaminhao)
+      setQuantidadeCaminhoes(novaQtd)
+      saveLayout(next, novoCaminhao, novaQtd)
+      return next
+    })
+  }, [autoSelecionarVeiculo, saveLayout])
+
+  const handleQuantidadeCaminhoesChange = useCallback((qty: number) => {
+    const novaQtd = Math.max(1, qty)
+    setQuantidadeCaminhoes(novaQtd)
+    saveLayout(itens, caminhao, novaQtd)
+  }, [itens, caminhao, saveLayout])
+
+  // Adiciona item direto (mobile tap ou qualquer clique no +)
+  const handleAddItemDirect = useCallback((itemCatalogo: ItemCatalogo) => {
+    if (limiteAtingido) {
+      toast.error('Limite de itens atingido. Faça upgrade para adicionar mais.')
+      return
+    }
+    const novoItem: ItemPositionado = {
+      itemId: itemCatalogo.id,
+      item: itemCatalogo,
+      x: 0,
+      y: itens.length * 60,
+      rotacao: 0,
+      uid: `${itemCatalogo.id}-${Date.now()}`,
+      quantidade: 1,
+    }
+    setItens((prev) => {
+      const next = [...prev, novoItem]
+      const { caminhao: novoCaminhao, quantidade: novaQtd } = autoSelecionarVeiculo(next)
+      setCaminhao(novoCaminhao)
+      setQuantidadeCaminhoes(novaQtd)
+      saveLayout(next, novoCaminhao, novaQtd)
+      return next
+    })
+    toast.success(`${itemCatalogo.nome} adicionado`, { duration: 1500 })
+  }, [itens, limiteAtingido, autoSelecionarVeiculo, saveLayout])
 
   const handleDragEnd = useCallback((event: DragEndEvent) => {
-    const { active, delta, over } = event
+    setActiveItem(null)
+    const { active, over } = event
     if (!over || over.id !== 'canvas-area') return
     const data = active.data.current
 
-    // Item vindo do catálogo → adiciona ao canvas
+    // Item vindo do catálogo → adiciona à lista
     if (data?.type === 'catalog-item') {
-      if (limiteAtingido) return
-      const novoItem: ItemPositionado = {
-        itemId: data.item.id,
-        item: data.item,
-        x: Math.max(0, Math.min(delta.x + 100, CANVAS_WIDTH - cmToPx(data.item.larguraCm))),
-        y: Math.max(0, Math.min(CANVAS_HEIGHT / 2, CANVAS_HEIGHT - cmToPx(data.item.profundidadeCm))),
-        rotacao: 0,
-        uid: `${data.item.id}-${Date.now()}`,
-      }
-      setItens((prev) => {
-        const next = [...prev, novoItem]
-        saveLayout(next, caminhao)
-        return next
-      })
-      return
+      handleAddItemDirect(data.item as ItemCatalogo)
     }
+  }, [handleAddItemDirect])
 
-    // Item já no canvas → reposiciona
-    if (data?.type === 'canvas-item') {
-      const itemPos = data.itemPos as ItemPositionado
-      setItens((prev) => {
-        const next = prev.map((i) => {
-          if (i.uid !== itemPos.uid) return i
-          return {
-            ...i,
-            x: Math.max(0, Math.min(i.x + delta.x, CANVAS_WIDTH - cmToPx(i.item.larguraCm))),
-            y: Math.max(0, Math.min(i.y + delta.y, CANVAS_HEIGHT - cmToPx(i.item.profundidadeCm))),
-          }
-        })
-        saveLayout(next, caminhao)
-        return next
-      })
+  // Cotações com preços recalculados conforme condições atuais
+  const cotacoesDinamicas = useMemo(() =>
+    COTACOES_MOCK.map((c) => ({
+      ...c,
+      precoCentavos: calcularPrecoDinamico(
+        c.precoCentavos,
+        volumeTotal,
+        c.caminhao,
+        quantidadeCaminhoes,
+        dataDesejada || null,
+      ),
+    })),
+    [volumeTotal, quantidadeCaminhoes, dataDesejada]
+  )
+
+  // Preço estimado atual da cotação contratada (se houver)
+  const cotacaoContratadaComPrecoAtual = useMemo(() => {
+    if (!cotacaoInfo) return null
+    const cotacaoOriginal = COTACOES_MOCK.find((c) =>
+      c.transportadora.nome === cotacaoInfo.nomeTransportadora
+    )
+    if (!cotacaoOriginal) return cotacaoInfo
+    return {
+      ...cotacaoInfo,
+      precoAtualCentavos: calcularPrecoDinamico(
+        cotacaoOriginal.precoCentavos,
+        volumeTotal,
+        cotacaoOriginal.caminhao,
+        quantidadeCaminhoes,
+        dataDesejada || null,
+      ),
     }
-  }, [itens, limiteAtingido, caminhao, saveLayout])
+  }, [cotacaoInfo, volumeTotal, quantidadeCaminhoes, dataDesejada])
 
-  const cotacoesFiltradas = COTACOES_MOCK
+  const cotacoesFiltradas = cotacoesDinamicas
     .filter((c) => {
       if (filtros.precoMax && c.precoCentavos > filtros.precoMax * 100) return false
       if (filtros.notaMin && c.transportadora.notaMedia < filtros.notaMin) return false
@@ -268,7 +604,8 @@ export function CanvasEditor({ mudancaId, caminhaoInicial, layoutInicial, plan, 
 
   const handleCaminhaoChange = (novo: CaminhaoInfo) => {
     setCaminhao(novo)
-    saveLayout(itens, novo)
+    setQuantidadeCaminhoes(1) // reset para 1 ao trocar de tipo manualmente
+    saveLayout(itens, novo, 1)
   }
 
   const handleContratar = useCallback(async (cotacao: CotacaoCard) => {
@@ -291,108 +628,366 @@ export function CanvasEditor({ mudancaId, caminhaoInicial, layoutInicial, plan, 
       setCotacaoContratadaId(cotacao.id)
       setContratarStatus((prev) => ({ ...prev, [cotacao.id]: 'success' }))
       // Atualiza o caminhão no canvas para o da cotação contratada
-      const caminhaoContratado = CAMINHOES.find((c) => c.id === cotacao.caminhao.id)
+      const caminhaoContratado = CAMINHOES.find((c) => c.tipo === cotacao.caminhao.tipo)
       if (caminhaoContratado) handleCaminhaoChange(caminhaoContratado)
+      // Salva infos da empresa contratada para exibir no banner
+      setCotacaoInfo({
+        nomeTransportadora: cotacao.transportadora.nome,
+        precoCentavos:      cotacao.precoCentavos,
+        dataDisponivel:     cotacao.dataDisponivel,
+        nomeVeiculo:        cotacao.caminhao.nome,
+        tipoVeiculo:        cotacao.caminhao.tipo,
+        seguroIncluso:      cotacao.seguroIncluso,
+      })
     } catch {
       setContratarStatus((prev) => ({ ...prev, [cotacao.id]: 'error' }))
       setTimeout(() => setContratarStatus((prev) => ({ ...prev, [cotacao.id]: 'idle' })), 3000)
     }
   }, [mudancaId, handleCaminhaoChange])
 
+  const [panelOpen, setPanelOpen] = useState(false)
+  const [panelVisible, setPanelVisible] = useState(false)
+  const [fabOpen, setFabOpen] = useState(false)
+
+  function openPanel() {
+    setPanelOpen(true)
+    requestAnimationFrame(() => requestAnimationFrame(() => setPanelVisible(true)))
+  }
+
+  function closePanel() {
+    setPanelVisible(false)
+    setTimeout(() => setPanelOpen(false), 300)
+  }
+  const [novaMudancaOpen, setNovaMudancaOpen] = useState(false)
+  const [showDelete, setShowDelete] = useState(false)
+  const [deleting, setDeleting] = useState(false)
+  const router = useRouter()
+
+  async function handleDeleteConfirm() {
+    setDeleting(true)
+    try {
+      const res = await fetch(`/api/mudancas/${mudancaId}`, { method: 'DELETE' })
+      if (res.ok) {
+        router.push('/app/dashboard')
+        router.refresh()
+      }
+    } finally {
+      setDeleting(false)
+      setShowDelete(false)
+    }
+  }
+
   return (
-    <div className="flex flex-col gap-4">
-      {/* Tabs + status de save */}
-      <div className="flex items-center justify-between">
-      <div className="flex gap-1 p-1 bg-gray-100 rounded-xl w-fit">
-        {(['canvas', 'cotacoes'] as const).map((t) => (
-          <button
-            key={t}
-            onClick={() => setTab(t)}
-            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-              tab === t ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-700'
-            }`}
-          >
-            {t === 'canvas' ? '📦 Canvas de Carga' : '💰 Cotações'}
-          </button>
-        ))}
+    <div className="flex flex-col gap-3 w-full">
+
+      {/* ── Barra de tabs + controles ─────────────────────────────────────── */}
+      <div className="flex items-center gap-2">
+
+        {/* Tabs — ocupam toda a largura no mobile */}
+        <div className="flex flex-1 gap-1 p-1 bg-gray-100 rounded-xl">
+          {(['canvas', 'cotacoes'] as const).map((t) => (
+            <button
+              key={t}
+              onClick={() => { setTab(t); closePanel() }}
+              className={`flex-1 lg:flex-none flex items-center justify-center gap-1.5 px-3 lg:px-4 py-2 rounded-lg text-sm font-medium transition-colors cursor-pointer ${
+                tab === t ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-700'
+              }`}
+            >
+              {t === 'canvas'
+                ? <><IconPackage size={16} stroke={1.5} /><span className="hidden sm:inline">Canvas de Carga</span><span className="sm:hidden">Canvas</span></>
+                : <><IconSearch size={16} stroke={1.5} /><span>Cotações</span></>}
+            </button>
+          ))}
+        </div>
+
+        {/* Botão para abrir painel no mobile */}
+        <button
+          onClick={() => panelOpen ? closePanel() : openPanel()}
+          className="lg:hidden flex items-center gap-1 px-3 py-2 rounded-xl bg-white border border-gray-200 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors cursor-pointer"
+          title={tab === 'canvas' ? 'Catálogo' : 'Filtros'}
+        >
+          {tab === 'canvas'
+            ? <IconBooks size={16} stroke={1.5} />
+            : <IconAdjustments size={16} stroke={1.5} />}
+          <IconChevronDown
+            size={14} stroke={2}
+            className={`transition-transform duration-200 ${panelOpen ? 'rotate-180' : ''}`}
+          />
+        </button>
+
+        {/* Status de save — só desktop */}
+        <span className="hidden lg:flex text-xs text-gray-400 items-center gap-1 flex-shrink-0">
+          {saveStatus === 'saving' && 'Salvando...'}
+          {saveStatus === 'saved' && <><IconCheck size={14} stroke={2} className="text-green-500" /> Salvo</>}
+          {saveStatus === 'unsaved' && '○ Não salvo'}
+        </span>
       </div>
-      <span className="text-xs text-gray-400">
-        {saveStatus === 'saving' && '⏳ Salvando...'}
-        {saveStatus === 'saved' && '✅ Salvo'}
-        {saveStatus === 'unsaved' && '○ Não salvo'}
-      </span>
-      </div>
 
-      {tab === 'canvas' && (
-        <DndContext sensors={sensors} onDragEnd={handleDragEnd}>
-          <div className="flex gap-4 items-start">
-            <aside className="w-56 flex-shrink-0">
-              <div className="bg-white rounded-xl border border-gray-200 p-4">
-                <h2 className="text-sm font-semibold text-gray-900 mb-3">📚 Catálogo</h2>
-                <CatalogoPainel />
-              </div>
-            </aside>
+      {/* ── DndContext envolve tudo ──────────────────────────────────────────── */}
+      <DndContext
+        sensors={sensors}
+        onDragStart={handleDragStart}
+        onDragEnd={handleDragEnd}
+        onDragCancel={handleDragCancel}
+      >
+        <div className="flex flex-col lg:flex-row gap-4 lg:gap-6 items-start w-full">
 
-            <div className="flex-1 flex flex-col gap-4">
-              <SeletorCaminhao selecionado={caminhao} onSelecionar={handleCaminhaoChange} itens={itens} />
-              <CanvasCarga
-                caminhao={caminhao}
-                itens={itens}
-                onItensChange={(next) => { setItens(next); saveLayout(next, caminhao) }}
-                onRemoveItem={handleRemoveItem}
-                limiteAtingido={limiteAtingido}
-              />
-            </div>
-
-            <ResumoCanvasPanel caminhao={caminhao} itens={itens} />
-          </div>
-        </DndContext>
-      )}
-
-      {tab === 'cotacoes' && (
-        <div className="flex gap-4 items-start">
-          <aside className="w-64 flex-shrink-0">
-            <FiltrosCotacaoPainel
-              filtros={filtros}
-              onChange={setFiltros}
-              filtrosAvancados={filtrosAvancados}
-            />
-          </aside>
-
-          <div className="flex-1">
-            {cotacoesFiltradas.length === 0 ? (
-              <div className="text-center py-12 text-gray-400">
-                <p className="text-2xl mb-2">🔍</p>
-                <p className="text-sm">Nenhuma cotação encontrada com esses filtros</p>
+          {/* ── Painel desktop: sempre visível na esquerda ─────────────────── */}
+          <aside className="hidden lg:block lg:w-64 lg:flex-shrink-0">
+            {tab === 'canvas' ? (
+              <div className="bg-white rounded-xl border border-gray-200 p-4 lg:sticky lg:top-4">
+                <h2 className="text-sm font-semibold text-gray-900 mb-3 flex items-center gap-1.5">
+                  <IconBooks size={16} stroke={1.5} className="text-gray-700" /> Catálogo
+                </h2>
+                <CatalogoPainel onAdd={handleAddItemDirect} />
               </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {cotacoesFiltradas.slice(0, plan === 'FREE' ? 3 : undefined).map((cotacao) => (
-                  <CardCotacao
-                    key={cotacao.id}
-                    cotacao={cotacao}
-                    contratada={cotacaoContratadaId === cotacao.id}
-                    contratarStatus={contratarStatus[cotacao.id] ?? 'idle'}
-                    onContratar={handleContratar}
+              <FiltrosCotacaoPainel
+                filtros={filtros}
+                onChange={setFiltros}
+                filtrosAvancados={filtrosAvancados}
+              />
+            )}
+          </aside>
+
+          {/* ── Gaveta mobile (portal animado) ──────────────────────────────── */}
+          {panelOpen && typeof window !== 'undefined' && createPortal(
+            <div style={{ zIndex: 9998 }}>
+              {/* Backdrop */}
+              <div
+                className="fixed inset-0 transition-opacity duration-300"
+                style={{ backgroundColor: 'rgba(0,0,0,0.4)', opacity: panelVisible ? 1 : 0 }}
+                onClick={closePanel}
+              />
+              {/* Gaveta */}
+              <div
+                className="fixed inset-x-0 bottom-0 bg-white rounded-t-2xl shadow-2xl transition-transform duration-300 ease-out"
+                style={{ transform: panelVisible ? 'translateY(0)' : 'translateY(100%)', maxHeight: '80vh', display: 'flex', flexDirection: 'column' }}
+              >
+                {/* Pill handle */}
+                <div className="flex justify-center pt-3 pb-1 flex-shrink-0">
+                  <div className="w-10 h-1 rounded-full bg-gray-300" />
+                </div>
+                {/* Header */}
+                <div className="flex items-center justify-between px-4 pt-2 pb-3 flex-shrink-0 border-b border-gray-100">
+                  <h2 className="text-base font-bold text-gray-900 flex items-center gap-2">
+                    {tab === 'canvas'
+                      ? <><IconBooks size={18} stroke={1.5} className="text-gray-700" /> Catálogo de itens</>
+                      : <><IconAdjustments size={18} stroke={1.5} className="text-gray-700" /> Filtros</>}
+                  </h2>
+                  <button
+                    onClick={closePanel}
+                    className="p-1.5 rounded-lg text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors cursor-pointer"
+                  >
+                    <IconChevronDown size={20} stroke={2} />
+                  </button>
+                </div>
+                {/* Conteúdo com scroll */}
+                <div className="overflow-y-auto overflow-x-hidden flex-1 px-3 py-4">
+                  {tab === 'canvas' ? (
+                    <CatalogoPainel onAdd={(item) => { handleAddItemDirect(item) }} />
+                  ) : (
+                    <FiltrosCotacaoPainel
+                      filtros={filtros}
+                      onChange={setFiltros}
+                      filtrosAvancados={filtrosAvancados}
+                    />
+                  )}
+                </div>
+              </div>
+            </div>,
+            document.body
+          )}
+
+          {/* ── Conteúdo principal ─────────────────────────────────────────── */}
+          <div className="flex-1 min-w-0 w-full">
+
+            {tab === 'canvas' && (
+              <div className="flex flex-col gap-3">
+                {cotacaoContratadaComPrecoAtual && (
+                  <EmpresaContratadaBanner
+                    info={cotacaoContratadaComPrecoAtual}
+                    onAceitarPreco={(novoPreco) => {
+                      setCotacaoInfo((prev) => prev ? { ...prev, precoCentavos: novoPreco } : prev)
+                      toast.success('Preço atualizado com sucesso')
+                    }}
                   />
-                ))}
+                )}
+                <ResumoBar
+                  caminhao={caminhao}
+                  itens={itens}
+                  quantidadeCaminhoes={quantidadeCaminhoes}
+                  dataDesejada={dataDesejada}
+                  onDataChange={handleDataChange}
+                />
+                <div className="bg-white rounded-xl border border-gray-200 p-4">
+                  <h2 className="text-sm font-semibold text-gray-700 mb-3 flex items-center gap-1.5">
+                    <IconTruck size={16} stroke={1.5} className="text-gray-700" /> Selecionar Veículo
+                  </h2>
+                  <SeletorCaminhao
+                    selecionado={caminhao}
+                    onSelecionar={handleCaminhaoChange}
+                    itens={itens}
+                    layout="grid"
+                    quantidadeCaminhoes={quantidadeCaminhoes}
+                    onQuantidadeCaminhoesChange={handleQuantidadeCaminhoesChange}
+                  />
+                </div>
+                <ListaItensCanvas
+                  itens={itens}
+                  onRemoveItem={handleRemoveItem}
+                  onQuantidadeChange={handleQuantidadeChange}
+                  limiteAtingido={limiteAtingido}
+                />
+                {/* Status de save — só mobile, abaixo do conteúdo */}
+                <div className="lg:hidden text-xs text-gray-400 flex items-center gap-1 justify-end pb-20">
+                  {saveStatus === 'saving' && 'Salvando...'}
+                  {saveStatus === 'saved' && <><IconCheck size={13} stroke={2} className="text-green-500" /> Salvo</>}
+                  {saveStatus === 'unsaved' && '○ Não salvo'}
+                </div>
               </div>
             )}
 
-            {plan === 'FREE' && COTACOES_MOCK.length > 3 && (
-              <div className="mt-4 rounded-xl border border-dashed border-blue-200 bg-blue-50 p-6 text-center">
-                <p className="text-sm font-semibold text-gray-700 mb-1">
-                  +{COTACOES_MOCK.length - 3} cotações disponíveis
-                </p>
-                <p className="text-xs text-gray-500 mb-3">Assine PRO para ver todas as cotações</p>
-                <a
-                  href="/settings/billing"
-                  className="text-sm px-4 py-2 rounded-lg bg-blue-600 text-white font-semibold hover:bg-blue-700"
-                >
-                  Assinar PRO
-                </a>
+            {tab === 'cotacoes' && (
+              <div className="flex flex-col gap-4">
+                {cotacoesFiltradas.length === 0 ? (
+                  <div className="text-center py-12 text-gray-400 flex flex-col items-center gap-2">
+                    <IconSearch size={32} stroke={1} className="text-gray-300" />
+                    <p className="text-sm">Nenhuma cotação encontrada com esses filtros</p>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {cotacoesFiltradas.slice(0, plan === 'FREE' ? 3 : undefined).map((cotacao) => (
+                      <CardCotacao
+                        key={cotacao.id}
+                        cotacao={cotacao}
+                        contratada={cotacaoContratadaId === cotacao.id}
+                        contratarStatus={contratarStatus[cotacao.id] ?? 'idle'}
+                        onContratar={handleContratar}
+                      />
+                    ))}
+                  </div>
+                )}
+
+                {plan === 'FREE' && COTACOES_MOCK.length > 3 && (
+                  <div className="rounded-xl border border-dashed border-[#FA9370] bg-[#FFF8F6] p-6 text-center mb-20 lg:mb-0">
+                    <p className="text-sm font-semibold text-gray-700 mb-1">
+                      +{COTACOES_MOCK.length - 3} cotações disponíveis
+                    </p>
+                    <p className="text-xs text-gray-500 mb-3">Assine PRO para ver todas as cotações</p>
+                    <a
+                      href="/app/billing"
+                      className="text-sm px-4 py-2 rounded-lg bg-[#E83500] text-white font-semibold hover:bg-[#C42A08] transition-colors"
+                    >
+                      Assinar PRO
+                    </a>
+                  </div>
+                )}
               </div>
             )}
+
+          </div>
+        </div>
+
+        <DragOverlay dropAnimation={null}>
+          {activeItem && <DragPreviewCard item={activeItem} />}
+        </DragOverlay>
+      </DndContext>
+
+      {/* ── Speed Dial FAB — só mobile ─────────────────────────────────────── */}
+      <div className="lg:hidden fixed flex flex-col items-end" style={{ zIndex: 1000, right: 24, bottom: 16 }}>
+
+        {/* Overlay para fechar ao clicar fora */}
+        {fabOpen && (
+          <div
+            className="fixed inset-0"
+            style={{ zIndex: -1 }}
+            onClick={() => setFabOpen(false)}
+          />
+        )}
+
+        {/* Ações — sobem animadas acima do FAB */}
+        <div className="flex flex-col items-end gap-3 mb-4">
+
+          {/* 1. Nova Mudança */}
+          <SpeedDialAction
+            label="Nova Mudança"
+            icon={<IconPlus size={18} stroke={2} />}
+            open={fabOpen}
+            delay={120}
+            color="bg-[#E83500]"
+            onClick={() => { setFabOpen(false); setNovaMudancaOpen(true) }}
+          />
+
+          {/* 2. Adicionar itens */}
+          <SpeedDialAction
+            label="Adicionar itens"
+            icon={<IconBooks size={18} stroke={1.5} />}
+            open={fabOpen}
+            delay={60}
+            color="bg-gray-700"
+            onClick={() => { setFabOpen(false); setTab('canvas'); openPanel() }}
+          />
+
+          {/* 3. Excluir mudança */}
+          <SpeedDialAction
+            label="Excluir mudança"
+            icon={<IconTrash size={18} stroke={1.5} />}
+            open={fabOpen}
+            delay={0}
+            color="bg-red-600"
+            onClick={() => { setFabOpen(false); setShowDelete(true) }}
+          />
+        </div>
+
+        {/* Botão principal */}
+        <button
+          onClick={() => setFabOpen((v) => !v)}
+          className="w-14 h-14 rounded-full bg-[#E83500] text-white shadow-xl flex items-center justify-center active:scale-95 cursor-pointer transition-all duration-300"
+          style={{ transform: fabOpen ? 'rotate(45deg)' : 'rotate(0deg)' }}
+          aria-label="Ações"
+        >
+          <IconPlus size={26} stroke={2.5} />
+        </button>
+      </div>
+
+      {/* Modais */}
+      {novaMudancaOpen && <NovaMudancaModal onClose={() => setNovaMudancaOpen(false)} />}
+
+      {showDelete && (
+        <div
+          className="fixed inset-0 flex items-center justify-center p-4"
+          style={{ backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 9999 }}
+          onClick={(e) => e.target === e.currentTarget && setShowDelete(false)}
+        >
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6 flex flex-col gap-4">
+            <div className="flex items-start gap-3">
+              <div className="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center flex-shrink-0">
+                <IconTrash size={20} stroke={2} className="text-red-600" />
+              </div>
+              <div>
+                <h3 className="text-base font-bold text-gray-900">Excluir mudança?</h3>
+                <p className="text-sm text-gray-500 mt-1">Esta ação não pode ser desfeita. Todos os itens, layout e cotações serão removidos permanentemente.</p>
+              </div>
+            </div>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setShowDelete(false)}
+                disabled={deleting}
+                className="flex-1 py-2.5 rounded-xl border border-gray-200 text-gray-700 text-sm font-semibold hover:bg-gray-50 transition-colors cursor-pointer disabled:opacity-50"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={handleDeleteConfirm}
+                disabled={deleting}
+                className="flex-1 py-2.5 rounded-xl bg-red-600 text-white text-sm font-bold hover:bg-red-700 transition-colors cursor-pointer disabled:opacity-50 flex items-center justify-center gap-1.5"
+              >
+                {deleting
+                  ? <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  : <><IconTrash size={14} stroke={2} /> Excluir</>}
+              </button>
+            </div>
           </div>
         </div>
       )}

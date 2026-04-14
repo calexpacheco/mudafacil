@@ -6,20 +6,24 @@ import { cn } from '@/design-system/utils'
 interface ResumoCanvasProps {
   caminhao: CaminhaoInfo
   itens: ItemPositionado[]
+  quantidadeCaminhoes?: number
+  dataDesejada?: string
+  onDataChange?: (data: string) => void
 }
 
-function calcularResumo(caminhao: CaminhaoInfo, itens: ItemPositionado[]): ResumoCanvas {
-  const volumeTotal = itens.reduce((acc, i) => acc + i.item.volumeM3, 0)
-  const pesoTotal = itens.reduce((acc, i) => acc + i.item.pesoKg, 0)
-  const ocupacaoPercentual = Math.min((volumeTotal / caminhao.capacidadeM3) * 100, 100)
-  const acimaDaCapacidade =
-    volumeTotal > caminhao.capacidadeM3 || pesoTotal > caminhao.capacidadeKg
+function calcularResumo(caminhao: CaminhaoInfo, itens: ItemPositionado[], quantidadeCaminhoes = 1): ResumoCanvas {
+  const volumeTotal    = itens.reduce((acc, i) => acc + i.item.volumeM3 * (i.quantidade ?? 1), 0)
+  const pesoTotal      = itens.reduce((acc, i) => acc + i.item.pesoKg   * (i.quantidade ?? 1), 0)
+  const capVol = caminhao.capacidadeM3 * quantidadeCaminhoes
+  const capKg  = caminhao.capacidadeKg  * quantidadeCaminhoes
+  const ocupacaoPercentual = Math.min((volumeTotal / capVol) * 100, 100)
+  const acimaDaCapacidade  = volumeTotal > capVol || pesoTotal > capKg
 
   return { volumeTotal, pesoTotal, ocupacaoPercentual, acimaDaCapacidade }
 }
 
-export function ResumoCanvasPanel({ caminhao, itens }: ResumoCanvasProps) {
-  const resumo = calcularResumo(caminhao, itens)
+export function ResumoCanvasPanel({ caminhao, itens, quantidadeCaminhoes = 1 }: ResumoCanvasProps) {
+  const resumo = calcularResumo(caminhao, itens, quantidadeCaminhoes)
 
   const barColor =
     resumo.ocupacaoPercentual > 90
@@ -75,6 +79,96 @@ function StatRow({ label, value }: { label: string; value: string }) {
     <div className="flex justify-between text-sm">
       <span className="text-gray-500">{label}</span>
       <span className="font-semibold text-gray-900">{value}</span>
+    </div>
+  )
+}
+
+// ─── Versão horizontal compacta (para usar acima da lista) ───────────────────
+export function ResumoBar({ caminhao, itens, quantidadeCaminhoes = 1, dataDesejada, onDataChange }: ResumoCanvasProps) {
+  const resumo = calcularResumo(caminhao, itens, quantidadeCaminhoes)
+
+  const barColor =
+    resumo.ocupacaoPercentual > 90
+      ? 'bg-red-500'
+      : resumo.ocupacaoPercentual > 70
+        ? 'bg-amber-500'
+        : 'bg-blue-500'
+
+  return (
+    <div className="bg-white rounded-xl border border-gray-200 px-4 py-3">
+
+      {/* ── Mobile: grid 2×2 ── Desktop: linha única com data inline ──────── */}
+      <div className="grid grid-cols-2 gap-x-4 gap-y-3 sm:flex sm:items-center sm:gap-5">
+
+        {/* Volume */}
+        <div className="flex flex-col">
+          <span className="text-[10px] text-gray-400 uppercase tracking-wide">Volume</span>
+          <span className="text-sm font-bold text-gray-900">{resumo.volumeTotal.toFixed(2)} m³</span>
+        </div>
+
+        {/* Peso */}
+        <div className="flex flex-col">
+          <span className="text-[10px] text-gray-400 uppercase tracking-wide">Peso</span>
+          <span className="text-sm font-bold text-gray-900">{resumo.pesoTotal.toFixed(0)} kg</span>
+        </div>
+
+        {/* Itens */}
+        <div className="flex flex-col">
+          <span className="text-[10px] text-gray-400 uppercase tracking-wide">Itens</span>
+          <span className="text-sm font-bold text-gray-900">
+            {itens.reduce((acc, i) => acc + (i.quantidade ?? 1), 0)}
+          </span>
+        </div>
+
+        {/* Ocupação */}
+        <div className="flex flex-col gap-1 sm:flex-1 sm:min-w-[120px]">
+          <div className="flex justify-between items-center">
+            <span className="text-[10px] text-gray-400 uppercase tracking-wide">Ocupação</span>
+            <span className={cn('text-xs font-bold', resumo.acimaDaCapacidade ? 'text-red-600' : 'text-gray-700')}>
+              {resumo.ocupacaoPercentual.toFixed(0)}%{resumo.acimaDaCapacidade && ' ⚠️'}
+            </span>
+          </div>
+          <div className="w-full h-2 rounded-full bg-gray-100 overflow-hidden">
+            <div
+              className={cn('h-full rounded-full transition-all', barColor)}
+              style={{ width: `${resumo.ocupacaoPercentual}%` }}
+            />
+          </div>
+        </div>
+
+        {/* Data — inline no desktop (dentro do flex), oculta aqui no mobile */}
+        {onDataChange !== undefined && (
+          <div className="hidden sm:flex flex-col gap-0.5 border-l border-gray-100 pl-5">
+            <span className="text-[10px] text-gray-400 uppercase tracking-wide">Data da mudança</span>
+            <input
+              type="date"
+              value={dataDesejada ?? ''}
+              min={new Date().toISOString().split('T')[0]}
+              onChange={(e) => onDataChange(e.target.value)}
+              className="text-sm font-bold text-gray-900 border-none outline-none bg-transparent cursor-pointer p-0 leading-tight"
+            />
+          </div>
+        )}
+
+      </div>
+
+      {/* Data — só no mobile, abaixo do grid com divisor */}
+      {onDataChange !== undefined && (
+        <div className="sm:hidden mt-3 pt-3 border-t border-gray-100 flex flex-col gap-0.5">
+          <span className="text-[10px] text-gray-400 uppercase tracking-wide">Data da mudança</span>
+          <input
+            type="date"
+            value={dataDesejada ?? ''}
+            min={new Date().toISOString().split('T')[0]}
+            onChange={(e) => onDataChange(e.target.value)}
+            className="text-sm font-bold text-gray-900 border-none outline-none bg-transparent cursor-pointer p-0 leading-tight w-full"
+          />
+        </div>
+      )}
+
+      {resumo.acimaDaCapacidade && (
+        <p className="mt-2 text-xs text-red-600 font-medium">⚠️ Acima da capacidade! Considere um veículo maior.</p>
+      )}
     </div>
   )
 }

@@ -1,7 +1,7 @@
 'use client'
 
 import { useLocale } from 'next-intl'
-import { usePathname, useRouter } from 'next/navigation'
+import { usePathname, useRouter } from '@/i18n/navigation'
 import { useTransition, useState, useRef, useEffect } from 'react'
 
 const LOCALES = [
@@ -9,10 +9,12 @@ const LOCALES = [
   { code: 'en', label: 'English',   flag: '🇺🇸' },
 ] as const
 
+type Locale = typeof LOCALES[number]['code']
+
 export function LocaleSwitcher() {
-  const locale = useLocale()
-  const router = useRouter()
-  const pathname = usePathname()
+  const locale   = useLocale()
+  const router   = useRouter()
+  const pathname = usePathname()   // pathname sem prefixo de locale (ex: "/" mesmo em /en)
   const [isPending, startTransition] = useTransition()
   const [open, setOpen] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
@@ -30,18 +32,12 @@ export function LocaleSwitcher() {
     return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [])
 
-  function switchLocale(newLocale: string) {
+  function switchLocale(newLocale: Locale) {
     setOpen(false)
     if (newLocale === locale) return
-
-    // Remove prefixo do locale atual do pathname e aplica o novo
-    const pathWithoutLocale = pathname.replace(/^\/(en|pt)/, '') || '/'
-
+    // router.replace do next-intl cuida automaticamente de adicionar/remover o prefixo
     startTransition(() => {
-      const newPath = newLocale === 'pt'
-        ? pathWithoutLocale          // PT não tem prefixo
-        : `/${newLocale}${pathWithoutLocale}`  // EN tem prefixo /en
-      router.push(newPath)
+      router.replace(pathname, { locale: newLocale })
     })
   }
 

@@ -2,7 +2,9 @@
 
 import { useLocale } from 'next-intl'
 import { usePathname, useRouter } from '@/i18n/navigation'
+import { usePathname as useNextPathname, useRouter as useNextRouter } from 'next/navigation'
 import { useTransition, useState, useRef, useEffect } from 'react'
+import { setLocaleAction } from '@/app/app/actions'
 
 const LOCALES = [
   { code: 'pt', label: 'Português', flag: '🇧🇷' },
@@ -11,15 +13,21 @@ const LOCALES = [
 
 type Locale = typeof LOCALES[number]['code']
 
+// Rotas de app não têm prefixo de locale na URL — troca via cookie
+const APP_PREFIXES = ['/app', '/login', '/settings', '/dashboard']
+
 export function LocaleSwitcher() {
-  const locale   = useLocale()
-  const router   = useRouter()
-  const pathname = usePathname()   // pathname sem prefixo de locale (ex: "/" mesmo em /en)
+  const locale      = useLocale()
+  const intlRouter  = useRouter()
+  const intlPathname = usePathname()
+  const nextRouter  = useNextRouter()
+  const nextPathname = useNextPathname()
   const [isPending, startTransition] = useTransition()
   const [open, setOpen] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
 
   const current = LOCALES.find((l) => l.code === locale) ?? LOCALES[0]
+  const isAppRoute = APP_PREFIXES.some((p) => nextPathname.startsWith(p))
 
   // Fecha ao clicar fora
   useEffect(() => {
@@ -35,9 +43,16 @@ export function LocaleSwitcher() {
   function switchLocale(newLocale: Locale) {
     setOpen(false)
     if (newLocale === locale) return
-    // router.replace do next-intl cuida automaticamente de adicionar/remover o prefixo
-    startTransition(() => {
-      router.replace(pathname, { locale: newLocale })
+
+    startTransition(async () => {
+      if (isAppRoute) {
+        // Rotas de app: salva cookie e recarrega para aplicar o novo locale
+        await setLocaleAction(newLocale)
+        nextRouter.refresh()
+      } else {
+        // Landing page: next-intl troca o prefixo de URL automaticamente
+        intlRouter.replace(intlPathname, { locale: newLocale })
+      }
     })
   }
 

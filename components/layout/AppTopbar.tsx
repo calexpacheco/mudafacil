@@ -6,6 +6,7 @@ import { useTranslations } from 'next-intl'
 import { cn } from '@/design-system/utils'
 import { signOutAction } from '@/app/app/actions'
 import { IconBell, IconPlus, IconCreditCard, IconLogout, IconMenu2 } from '@tabler/icons-react'
+import { LocaleSwitcher } from '@/components/ui/LocaleSwitcher'
 
 interface AppTopbarProps {
   userName: string
@@ -48,6 +49,8 @@ export function AppTopbar({ userName, userEmail, onToggleSidebar, onOpenModal }:
 
       {/* ─── Right actions ───────────────────────────────────────────────── */}
       <div className="flex items-center gap-3">
+        <LocaleSwitcher />
+
         <button
           title={t('notifications')}
           className="relative p-2 rounded-xl text-gray-500 hover:bg-gray-100 hover:text-gray-700 transition-colors cursor-pointer"

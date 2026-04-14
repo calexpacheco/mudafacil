@@ -1,11 +1,22 @@
 import { getRequestConfig } from 'next-intl/server'
+import { cookies } from 'next/headers'
 import { routing } from './routing'
 
+type Locale = typeof routing.locales[number]
+
+function isValidLocale(v: unknown): v is Locale {
+  return routing.locales.includes(v as Locale)
+}
+
 export default getRequestConfig(async ({ requestLocale }) => {
-  // Valida e normaliza o locale
+  // Para rotas com [locale] no segmento (landing page), usa o valor da URL.
+  // Para rotas sem prefixo (/app/*), lê o cookie NEXT_LOCALE.
   let locale = await requestLocale
-  if (!locale || !routing.locales.includes(locale as 'pt' | 'en')) {
-    locale = routing.defaultLocale
+
+  if (!isValidLocale(locale)) {
+    const jar = await cookies()
+    const fromCookie = jar.get('NEXT_LOCALE')?.value
+    locale = isValidLocale(fromCookie) ? fromCookie : routing.defaultLocale
   }
 
   return {

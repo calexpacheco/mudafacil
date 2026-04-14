@@ -3,11 +3,10 @@
 import { useEffect, useRef, useState } from 'react'
 
 const steps = [
-  { num: '01', title: 'Crie sua mudança', desc: 'Informe origem, destino e data desejada em segundos.' },
-  { num: '02', title: 'Monte o canvas', desc: 'Arraste seus móveis do catálogo para o caminhão virtual.' },
-  { num: '03', title: 'Escolha o veículo', desc: 'Veja em tempo real qual caminhão comporta exatamente sua carga.' },
-  { num: '04', title: 'Receba cotações', desc: 'Compare preços e notas de transportadoras verificadas.' },
-  { num: '05', title: 'Contrate e mude!', desc: 'Confirme com 1 clique e fique tranquilo no dia da mudança.' },
+  { num: '01', title: 'Informe sua mudança', desc: 'Diga de onde para onde você vai e o que precisa levar.' },
+  { num: '02', title: 'Organize seus itens', desc: 'Liste seus móveis e veja tudo de forma clara e organizada.' },
+  { num: '03', title: 'Receba cotações', desc: 'Compare preços e escolha a melhor empresa.' },
+  { num: '04', title: 'Agende com tranquilidade', desc: 'Combine tudo direto com a transportadora escolhida.' },
 ]
 
 export function HowItWorksSection() {
@@ -89,9 +88,9 @@ export function HowItWorksSection() {
           }}
         >
           <h2 className="text-3xl sm:text-4xl font-extrabold text-white mb-4">
-            5 passos para mover sem estresse
+            Organize sua mudança em poucos passos
           </h2>
-          <p className="text-[#FA9370] text-base">Simples, rápido e visual</p>
+          <p className="text-[#FA9370] text-base">Rápido, simples e sem complicação.</p>
         </div>
 
         {/* Steps com bounce staggered 01→05 */}

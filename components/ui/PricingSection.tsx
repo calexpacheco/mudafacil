@@ -101,8 +101,8 @@ export function PricingSection() {
             transition: 'opacity 0.8s ease, transform 0.8s ease',
           }}
         >
-          <h2 className="text-3xl sm:text-4xl font-extrabold text-gray-900 mb-4">Preço simples e justo</h2>
-          <p className="text-gray-500 text-lg">Comece grátis. Assine quando precisar de mais.</p>
+          <h2 className="text-3xl sm:text-4xl font-extrabold text-gray-900 mb-4">Comece grátis e evolua quando precisar</h2>
+          <p className="text-gray-500 text-lg">Sem compromisso. Você só paga quando quiser mais recursos.</p>
         </div>
 
         {/* Cards com bounce staggered */}
@@ -127,7 +127,7 @@ export function PricingSection() {
             </div>
             <ul className="flex flex-col gap-2.5 flex-1 mb-6">
               <PricingItem text="1 mudança ativa" />
-              <PricingItem text="Até 15 itens no canvas" />
+              <PricingItem text="Até 5 itens cadastrados" />
               <PricingItem text="3 cotações por mudança" />
               <PricingItem text="Filtros avançados" negative />
             </ul>
@@ -139,10 +139,10 @@ export function PricingSection() {
             </Link>
           </div>
 
-          {/* Trial */}
+          {/* Mais escolhido — R$29,90 */}
           <div
             data-card
-            className="p-6 rounded-2xl border-2 border-[#F59E0B] bg-amber-50/60 backdrop-blur-sm flex flex-col relative"
+            className="p-6 rounded-2xl border-2 border-[#E83500] bg-[#E83500]/80 backdrop-blur-sm flex flex-col relative"
             style={{
               opacity: visibleCards[1] ? 1 : 0,
               transform: visibleCards[1] ? 'translateY(0) scale(1)' : 'translateY(50px) scale(0.94)',
@@ -151,33 +151,33 @@ export function PricingSection() {
                 : 'opacity 0.3s ease, transform 0.3s ease',
             }}
           >
-            <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-[#F59E0B] text-white text-xs font-bold px-4 py-1 rounded-full whitespace-nowrap">
-              Mais popular
+            <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-[#E83500] text-white text-xs font-bold px-4 py-1 rounded-full whitespace-nowrap">
+              🔥 Mais escolhido
             </div>
             <div className="mb-5">
-              <p className="text-xs font-bold text-amber-600 uppercase tracking-widest mb-2">Trial Gratuito</p>
-              <p className="text-3xl font-extrabold text-gray-900">14 dias</p>
-              <p className="text-sm text-amber-600 font-medium mt-0.5">grátis, sem cartão</p>
+              <p className="text-xs font-bold text-[#FCC1A9] uppercase tracking-widest mb-2">Popular</p>
+              <p className="text-3xl font-extrabold text-white">R$ 29,90</p>
+              <p className="text-sm text-[#FCC1A9] font-medium mt-0.5">/mês · 7 dias grátis para testar</p>
             </div>
             <ul className="flex flex-col gap-2.5 flex-1 mb-6">
-              <PricingItem text="Mudanças ilimitadas" />
-              <PricingItem text="Itens ilimitados" />
-              <PricingItem text="Cotações ilimitadas" />
-              <PricingItem text="Filtros avançados" />
-              <PricingItem text="Suporte prioritário" />
+              <PricingItemInverse text="Mudanças ilimitadas" />
+              <PricingItemInverse text="Itens ilimitados" />
+              <PricingItemInverse text="Comparação completa de preços" />
+              <PricingItemInverse text="Filtros avançados" />
+              <PricingItemInverse text="Suporte prioritário" />
             </ul>
             <Link
               href="/login"
-              className="w-full py-2.5 rounded-xl bg-[#F59E0B] text-white text-sm font-bold text-center hover:bg-amber-600 transition-colors"
+              className="w-full py-2.5 rounded-xl bg-white text-[#E83500] text-sm font-bold text-center hover:bg-[#FEF0EA] transition-colors"
             >
-              Começar trial grátis
+              Testar grátis por 7 dias
             </Link>
           </div>
 
-          {/* PRO */}
+          {/* PRO — âncora */}
           <div
             data-card
-            className="p-6 rounded-2xl border-2 border-[#E83500] bg-[#E83500]/80 backdrop-blur-sm flex flex-col"
+            className="p-6 rounded-2xl border border-gray-200 bg-white/60 backdrop-blur-sm flex flex-col"
             style={{
               opacity: visibleCards[2] ? 1 : 0,
               transform: visibleCards[2] ? 'translateY(0) scale(1)' : 'translateY(50px) scale(0.94)',
@@ -187,22 +187,21 @@ export function PricingSection() {
             }}
           >
             <div className="mb-5">
-              <p className="text-xs font-bold text-[#FCC1A9] uppercase tracking-widest mb-2">PRO</p>
-              <p className="text-3xl font-extrabold text-white">R$ 29,90</p>
-              <p className="text-sm text-[#FCC1A9] mt-0.5">/mês</p>
+              <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">PRO</p>
+              <p className="text-3xl font-extrabold text-gray-900">R$ 79,90</p>
+              <p className="text-sm text-gray-400 mt-0.5">/mês</p>
             </div>
             <ul className="flex flex-col gap-2.5 flex-1 mb-6">
-              <PricingItemInverse text="Mudanças ilimitadas" />
-              <PricingItemInverse text="Itens ilimitados" />
-              <PricingItemInverse text="Cotações ilimitadas" />
-              <PricingItemInverse text="Filtros avançados" />
-              <PricingItemInverse text="Suporte prioritário" />
+              <PricingItem text="Tudo do plano Popular" />
+              <PricingItem text="Prioridade nas melhores cotações" />
+              <PricingItem text="Atendimento dedicado" />
+              <PricingItem text="Recursos avançados (em breve)" />
             </ul>
             <Link
               href="/login"
-              className="w-full py-2.5 rounded-xl bg-white text-[#E83500] text-sm font-bold text-center hover:bg-[#FEF0EA] transition-colors"
+              className="w-full py-2.5 rounded-xl border border-gray-200 text-gray-700 text-sm font-semibold text-center hover:bg-gray-50 transition-colors"
             >
-              Assinar PRO
+              Assinar Pro
             </Link>
           </div>
 

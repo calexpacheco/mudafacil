@@ -162,11 +162,11 @@ export function TestimonialsSection() {
               Clientes satisfeitos
             </span>
             <h2 className="text-3xl sm:text-4xl font-extrabold text-gray-900 leading-tight mb-4">
-              Quem mudou com a gente<br className="hidden sm:block" />
-              <span className="text-[#E83500]"> não volta atrás</span>
+              Quem usa,{' '}
+              <span className="text-[#E83500]">recomenda</span>
             </h2>
             <p className="text-gray-500 text-base leading-relaxed max-w-md">
-              Mais de 4.800 famílias já planejaram a mudança pelo MudaFácil — e a maioria diz que indicaria para todos os amigos.
+              Milhares de pessoas já planejaram sua mudança com mais tranquilidade. Depois que usam, não querem mais fazer mudança do jeito antigo.
             </p>
           </div>
 

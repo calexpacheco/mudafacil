@@ -13,39 +13,39 @@ import {
 const features = [
   {
     Icon: IconTarget,
-    title: 'Canvas de carga interativo',
+    title: 'Liste tudo que você precisa levar',
     description:
-      'Arraste ícones de móveis (geladeira, cama, sofá, caixas) para dentro de um container virtual. Cada item tem dimensão proporcional real e encaixa visualmente no espaço.',
+      'Adicione seus móveis e caixas de forma simples e veja tudo organizado em um só lugar. Sem planilhas, sem papel.',
   },
   {
     Icon: IconTruck,
-    title: 'Seletor visual de caminhão',
+    title: 'Escolha o tamanho ideal sem erro',
     description:
-      'Compare 4 tamanhos (Fiorino, HR, 3/4, Baú) com barra de ocupação em tempo real conforme você adiciona itens ao canvas. Sem suposições.',
+      'Descubra qual caminhão atende sua mudança sem pagar a mais por espaço desnecessário. A gente faz a conta por você.',
   },
   {
     Icon: IconCurrencyDollar,
-    title: 'Filtros de cotação avançados',
+    title: 'Compare e escolha com confiança',
     description:
-      'Filtre por preço, nota de avaliação, data disponível, seguro incluso e tipo de veículo. Ordene e compare lado a lado em cards claros.',
+      'Veja preços, avaliações e escolha a melhor opção para sua mudança. Tudo claro e transparente, sem surpresas.',
   },
   {
     Icon: IconBooks,
-    title: 'Catálogo visual de 40+ itens',
+    title: 'Mais de 40 itens prontos para usar',
     description:
-      'Biblioteca com ícones categorizados (quarto, cozinha, sala, escritório, caixas P/M/G) com peso e volume pré-estimados, editáveis pelo usuário.',
+      'Cama, sofá, geladeira, caixas e muito mais — já cadastrados e organizados por cômodo. É só selecionar o que você tem.',
   },
   {
     Icon: IconChartBar,
-    title: 'Resumo inteligente da carga',
+    title: 'Veja o quanto já está organizado',
     description:
-      'Painel lateral com volume total (m³), peso estimado, percentual de ocupação do caminhão selecionado e alerta se estiver acima da capacidade.',
+      'Acompanhe em tempo real o volume total e o espaço ocupado no caminhão. Você sabe exatamente o que cabe antes de contratar.',
   },
   {
     Icon: IconStar,
-    title: 'Transportadoras avaliadas',
+    title: 'Só empresas de confiança',
     description:
-      'Apenas transportadoras verificadas com avaliações reais. Nota média, total de avaliações e histórico visíveis antes de contratar.',
+      'Todas as transportadoras são verificadas e têm avaliações reais de outros clientes. Você escolhe com segurança.',
   },
 ]
 
@@ -132,10 +132,10 @@ export function FeaturesSection() {
           }}
         >
           <h2 className="text-3xl sm:text-4xl font-extrabold text-gray-900 mb-4">
-            Tudo que você precisa para uma mudança perfeita
+            Tudo para organizar sua mudança sem estresse
           </h2>
           <p className="text-gray-500 text-lg max-w-2xl mx-auto">
-            Do planejamento visual à contratação em minutos. Sem planilhas, sem suposições.
+            Do planejamento à escolha da empresa, tudo em um só lugar.
           </p>
         </div>
 

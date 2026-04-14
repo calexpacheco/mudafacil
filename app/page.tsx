@@ -57,20 +57,19 @@ function HeroSection() {
           {/* Pill badge */}
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 border border-white/20 text-white text-sm font-semibold mb-6 backdrop-blur-sm">
             <IconTruck size={18} stroke={2} className="text-[#FA9370]" />
-            <span>14 dias grátis — sem cartão de crédito</span>
+            <span>7 dias grátis para testar — sem cartão de crédito</span>
           </div>
 
           {/* Headline */}
           <h1 className="text-4xl sm:text-5xl md:text-6xl font-extrabold text-white leading-tight mb-6 drop-shadow-lg">
-            Arraste seus móveis,{' '}
-            <span className="text-[#FA9370]">escolha o caminhão</span>
-            {' '}e mude sem estresse
+            Planeje sua mudança em minutos{' '}
+            <span className="text-[#FA9370]">e escolha a melhor opção</span>
+            {' '}sem dor de cabeça
           </h1>
 
           {/* Subheadline */}
           <p className="text-lg sm:text-xl text-white/90 max-w-2xl mx-auto mb-10 leading-relaxed">
-            Monte visualmente a carga da sua mudança com drag & drop, compare tamanhos de caminhão
-            em tempo real e receba cotações instantâneas de transportadoras avaliadas.
+            Informe o que você precisa levar e receba cotações de empresas confiáveis na sua região — simples, rápido e sem compromisso.
           </p>
 
           {/* CTAs */}
@@ -95,10 +94,10 @@ function HeroSection() {
               <IconStar size={16} stroke={1.5} className="text-amber-400" /> 4.9 de satisfação
             </span>
             <span className="flex items-center gap-1.5">
-              <IconPackage size={16} stroke={1.5} className="text-white/80" /> +2.000 mudanças planejadas
+              <IconPackage size={16} stroke={1.5} className="text-white/80" /> Mais de 2.000 mudanças planejadas com satisfação
             </span>
             <span className="flex items-center gap-1.5">
-              <IconCheck size={16} stroke={2} className="text-emerald-400" /> Transportadoras verificadas
+              <IconCheck size={16} stroke={2} className="text-emerald-400" /> Empresas verificadas e avaliadas
             </span>
           </div>
         </div>

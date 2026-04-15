@@ -441,5 +441,11 @@
     "piano": "Piano / Teclado",
     "maquina_secar": "Máquina de Secar",
     "aquecedor": "Aquecedor / Ar-cond."
+  },
+  "meta": {
+    "title": "MudaFácil — Planeje sua mudança com drag & drop",
+    "description": "Monte visualmente a carga da sua mudança, compare caminhões e receba cotações instantâneas de transportadoras avaliadas.",
+    "ogTitle": "MudaFácil — Arraste seus móveis, escolha o caminhão e mude sem estresse",
+    "ogDescription": "Monte visualmente a carga da sua mudança com drag & drop, compare tamanhos de caminhão em tempo real e receba cotações instantâneas."
   }
 }

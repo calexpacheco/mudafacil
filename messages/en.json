@@ -441,5 +441,11 @@
     "piano": "Piano / Keyboard",
     "maquina_secar": "Dryer",
     "aquecedor": "Heater / A/C"
+  },
+  "meta": {
+    "title": "MudaFácil — Plan your move with drag & drop",
+    "description": "Visually plan your move load, compare truck sizes and get instant quotes from verified carriers.",
+    "ogTitle": "MudaFácil — Drag your furniture, pick the truck, move stress-free",
+    "ogDescription": "Visually plan your move load with drag & drop, compare truck sizes in real time and get instant quotes."
   }
 }
